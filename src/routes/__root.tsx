@@ -11,6 +11,10 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { ThemeProvider } from "../lib/theme-context";
+import { MusicProvider } from "../lib/music-context";
+import { AppShell } from "../components/app-shell";
+import { FloatingMusicPlayer } from "../components/music-player";
 
 function NotFoundComponent() {
   return (
@@ -77,11 +81,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "SiRT 06 Digital — Sistem Informasi RT 06" },
+      { name: "description", content: "Sistem Informasi RT 06 / RW 07 Bogeman Wetan — Digitalisasi dan Transparansi" },
+      { name: "author", content: "RT 06 / RW 07 Bogeman Wetan" },
+      { property: "og:title", content: "SiRT 06 Digital" },
+      { property: "og:description", content: "Dashboard komunitas modern untuk warga RT 06." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
@@ -90,6 +94,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap",
       },
     ],
   }),
@@ -118,8 +126,14 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <ThemeProvider>
+        <MusicProvider>
+          <AppShell>
+            <Outlet />
+          </AppShell>
+          <FloatingMusicPlayer />
+        </MusicProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
