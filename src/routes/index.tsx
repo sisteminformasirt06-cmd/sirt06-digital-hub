@@ -44,17 +44,18 @@ const announcements = [
 ];
 
 function Dashboard() {
-  const [time, setTime] = useState(nowWIB());
+  const [time, setTime] = useState<Date | null>(null);
   const [spinning, setSpinning] = useState(false);
 
   useEffect(() => {
+    setTime(nowWIB());
     const id = setInterval(() => setTime(nowWIB()), 1000);
     return () => clearInterval(id);
   }, []);
 
-  const jam = `${String(time.getHours()).padStart(2, "0")}:${String(time.getMinutes()).padStart(2, "0")}:${String(time.getSeconds()).padStart(2, "0")}`;
-  const hari = HARI[time.getDay()];
-  const tanggal = `${time.getDate()} ${BULAN[time.getMonth()]} ${time.getFullYear()}`;
+  const jam = time ? `${String(time.getHours()).padStart(2, "0")}:${String(time.getMinutes()).padStart(2, "0")}:${String(time.getSeconds()).padStart(2, "0")}` : "--:--:--";
+  const hari = time ? HARI[time.getDay()] : "—";
+  const tanggal = time ? `${time.getDate()} ${BULAN[time.getMonth()]} ${time.getFullYear()}` : "—";
 
   const handleRefresh = () => {
     setSpinning(true);
