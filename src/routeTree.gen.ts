@@ -9,8 +9,86 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WhatsappRouteImport } from './routes/whatsapp'
+import { Route as WargaRouteImport } from './routes/warga'
+import { Route as UmkmRouteImport } from './routes/umkm'
+import { Route as QrCenterRouteImport } from './routes/qr-center'
+import { Route as PoskamlingRouteImport } from './routes/poskamling'
+import { Route as PengaturanRouteImport } from './routes/pengaturan'
+import { Route as MediaRouteImport } from './routes/media'
+import { Route as KritikSaranRouteImport } from './routes/kritik-saran'
+import { Route as KeuanganRouteImport } from './routes/keuangan'
+import { Route as InventarisRouteImport } from './routes/inventaris'
+import { Route as EmergencyRouteImport } from './routes/emergency'
+import { Route as AdministrasiRouteImport } from './routes/administrasi'
+import { Route as AbsensiRouteImport } from './routes/absensi'
 import { Route as IndexRouteImport } from './routes/index'
 
+const WhatsappRoute = WhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WargaRoute = WargaRouteImport.update({
+  id: '/warga',
+  path: '/warga',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UmkmRoute = UmkmRouteImport.update({
+  id: '/umkm',
+  path: '/umkm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrCenterRoute = QrCenterRouteImport.update({
+  id: '/qr-center',
+  path: '/qr-center',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoskamlingRoute = PoskamlingRouteImport.update({
+  id: '/poskamling',
+  path: '/poskamling',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PengaturanRoute = PengaturanRouteImport.update({
+  id: '/pengaturan',
+  path: '/pengaturan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MediaRoute = MediaRouteImport.update({
+  id: '/media',
+  path: '/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KritikSaranRoute = KritikSaranRouteImport.update({
+  id: '/kritik-saran',
+  path: '/kritik-saran',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KeuanganRoute = KeuanganRouteImport.update({
+  id: '/keuangan',
+  path: '/keuangan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InventarisRoute = InventarisRouteImport.update({
+  id: '/inventaris',
+  path: '/inventaris',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmergencyRoute = EmergencyRouteImport.update({
+  id: '/emergency',
+  path: '/emergency',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdministrasiRoute = AdministrasiRouteImport.update({
+  id: '/administrasi',
+  path: '/administrasi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AbsensiRoute = AbsensiRouteImport.update({
+  id: '/absensi',
+  path: '/absensi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +97,214 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/absensi': typeof AbsensiRoute
+  '/administrasi': typeof AdministrasiRoute
+  '/emergency': typeof EmergencyRoute
+  '/inventaris': typeof InventarisRoute
+  '/keuangan': typeof KeuanganRoute
+  '/kritik-saran': typeof KritikSaranRoute
+  '/media': typeof MediaRoute
+  '/pengaturan': typeof PengaturanRoute
+  '/poskamling': typeof PoskamlingRoute
+  '/qr-center': typeof QrCenterRoute
+  '/umkm': typeof UmkmRoute
+  '/warga': typeof WargaRoute
+  '/whatsapp': typeof WhatsappRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/absensi': typeof AbsensiRoute
+  '/administrasi': typeof AdministrasiRoute
+  '/emergency': typeof EmergencyRoute
+  '/inventaris': typeof InventarisRoute
+  '/keuangan': typeof KeuanganRoute
+  '/kritik-saran': typeof KritikSaranRoute
+  '/media': typeof MediaRoute
+  '/pengaturan': typeof PengaturanRoute
+  '/poskamling': typeof PoskamlingRoute
+  '/qr-center': typeof QrCenterRoute
+  '/umkm': typeof UmkmRoute
+  '/warga': typeof WargaRoute
+  '/whatsapp': typeof WhatsappRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/absensi': typeof AbsensiRoute
+  '/administrasi': typeof AdministrasiRoute
+  '/emergency': typeof EmergencyRoute
+  '/inventaris': typeof InventarisRoute
+  '/keuangan': typeof KeuanganRoute
+  '/kritik-saran': typeof KritikSaranRoute
+  '/media': typeof MediaRoute
+  '/pengaturan': typeof PengaturanRoute
+  '/poskamling': typeof PoskamlingRoute
+  '/qr-center': typeof QrCenterRoute
+  '/umkm': typeof UmkmRoute
+  '/warga': typeof WargaRoute
+  '/whatsapp': typeof WhatsappRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/absensi'
+    | '/administrasi'
+    | '/emergency'
+    | '/inventaris'
+    | '/keuangan'
+    | '/kritik-saran'
+    | '/media'
+    | '/pengaturan'
+    | '/poskamling'
+    | '/qr-center'
+    | '/umkm'
+    | '/warga'
+    | '/whatsapp'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/absensi'
+    | '/administrasi'
+    | '/emergency'
+    | '/inventaris'
+    | '/keuangan'
+    | '/kritik-saran'
+    | '/media'
+    | '/pengaturan'
+    | '/poskamling'
+    | '/qr-center'
+    | '/umkm'
+    | '/warga'
+    | '/whatsapp'
+  id:
+    | '__root__'
+    | '/'
+    | '/absensi'
+    | '/administrasi'
+    | '/emergency'
+    | '/inventaris'
+    | '/keuangan'
+    | '/kritik-saran'
+    | '/media'
+    | '/pengaturan'
+    | '/poskamling'
+    | '/qr-center'
+    | '/umkm'
+    | '/warga'
+    | '/whatsapp'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AbsensiRoute: typeof AbsensiRoute
+  AdministrasiRoute: typeof AdministrasiRoute
+  EmergencyRoute: typeof EmergencyRoute
+  InventarisRoute: typeof InventarisRoute
+  KeuanganRoute: typeof KeuanganRoute
+  KritikSaranRoute: typeof KritikSaranRoute
+  MediaRoute: typeof MediaRoute
+  PengaturanRoute: typeof PengaturanRoute
+  PoskamlingRoute: typeof PoskamlingRoute
+  QrCenterRoute: typeof QrCenterRoute
+  UmkmRoute: typeof UmkmRoute
+  WargaRoute: typeof WargaRoute
+  WhatsappRoute: typeof WhatsappRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/whatsapp': {
+      id: '/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/whatsapp'
+      preLoaderRoute: typeof WhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/warga': {
+      id: '/warga'
+      path: '/warga'
+      fullPath: '/warga'
+      preLoaderRoute: typeof WargaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/umkm': {
+      id: '/umkm'
+      path: '/umkm'
+      fullPath: '/umkm'
+      preLoaderRoute: typeof UmkmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-center': {
+      id: '/qr-center'
+      path: '/qr-center'
+      fullPath: '/qr-center'
+      preLoaderRoute: typeof QrCenterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/poskamling': {
+      id: '/poskamling'
+      path: '/poskamling'
+      fullPath: '/poskamling'
+      preLoaderRoute: typeof PoskamlingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pengaturan': {
+      id: '/pengaturan'
+      path: '/pengaturan'
+      fullPath: '/pengaturan'
+      preLoaderRoute: typeof PengaturanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/media': {
+      id: '/media'
+      path: '/media'
+      fullPath: '/media'
+      preLoaderRoute: typeof MediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kritik-saran': {
+      id: '/kritik-saran'
+      path: '/kritik-saran'
+      fullPath: '/kritik-saran'
+      preLoaderRoute: typeof KritikSaranRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/keuangan': {
+      id: '/keuangan'
+      path: '/keuangan'
+      fullPath: '/keuangan'
+      preLoaderRoute: typeof KeuanganRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inventaris': {
+      id: '/inventaris'
+      path: '/inventaris'
+      fullPath: '/inventaris'
+      preLoaderRoute: typeof InventarisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/emergency': {
+      id: '/emergency'
+      path: '/emergency'
+      fullPath: '/emergency'
+      preLoaderRoute: typeof EmergencyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/administrasi': {
+      id: '/administrasi'
+      path: '/administrasi'
+      fullPath: '/administrasi'
+      preLoaderRoute: typeof AdministrasiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/absensi': {
+      id: '/absensi'
+      path: '/absensi'
+      fullPath: '/absensi'
+      preLoaderRoute: typeof AbsensiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +317,19 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AbsensiRoute: AbsensiRoute,
+  AdministrasiRoute: AdministrasiRoute,
+  EmergencyRoute: EmergencyRoute,
+  InventarisRoute: InventarisRoute,
+  KeuanganRoute: KeuanganRoute,
+  KritikSaranRoute: KritikSaranRoute,
+  MediaRoute: MediaRoute,
+  PengaturanRoute: PengaturanRoute,
+  PoskamlingRoute: PoskamlingRoute,
+  QrCenterRoute: QrCenterRoute,
+  UmkmRoute: UmkmRoute,
+  WargaRoute: WargaRoute,
+  WhatsappRoute: WhatsappRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
