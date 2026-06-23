@@ -75,36 +75,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => saveLS(AUDIT_KEY, audit), [audit]);
 
   const logAction = useCallback((aksi: string, modul: string, detail?: string) => {
-    setAudit((prev) => [
-      {
+    setAudit((prev) => {
+      const entry: AuditEntry = {
         id: uid("aud"),
         userId: user?.id ?? null,
         nama: user?.nama ?? "Anonim",
         role: user?.role ?? "Anonim",
         aksi, modul, detail,
         waktu: nowISO(),
-      },
-      ...prev,
-    ].slice(0, 500));
+      };
+      return [entry, ...prev].slice(0, 500);
+    });
   }, [user]);
 
   const login = useCallback((pin: string) => {
     const found = users.find((u) => u.pin === pin && u.aktif);
     if (!found) return { ok: false, message: "PIN salah atau akun nonaktif" };
     setUser(found);
-    setAudit((prev) => [
-      { id: uid("aud"), userId: found.id, nama: found.nama, role: found.role, aksi: "Login", modul: "Auth", waktu: nowISO() },
-      ...prev,
-    ].slice(0, 500));
+    const entry: AuditEntry = { id: uid("aud"), userId: found.id, nama: found.nama, role: found.role, aksi: "Login", modul: "Auth", waktu: nowISO() };
+    setAudit((prev) => [entry, ...prev].slice(0, 500));
     return { ok: true };
   }, [users]);
 
   const logout = useCallback(() => {
     if (user) {
-      setAudit((prev) => [
-        { id: uid("aud"), userId: user.id, nama: user.nama, role: user.role, aksi: "Logout", modul: "Auth", waktu: nowISO() },
-        ...prev,
-      ].slice(0, 500));
+      const entry: AuditEntry = { id: uid("aud"), userId: user.id, nama: user.nama, role: user.role, aksi: "Logout", modul: "Auth", waktu: nowISO() };
+      setAudit((prev) => [entry, ...prev].slice(0, 500));
     }
     setUser(null);
   }, [user]);
