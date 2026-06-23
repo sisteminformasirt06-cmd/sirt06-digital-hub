@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   Users, Home, Wallet, Megaphone, CalendarCheck, Eye,
   RefreshCw, Clock, CalendarDays, TrendingUp, ArrowUpRight,
+  Siren, Store, MessageSquareWarning, Wifi, Activity, CalendarRange,
 } from "lucide-react";
 import logo from "@/assets/logo-rt.png";
 
@@ -43,6 +45,21 @@ const announcements = [
   "🛡️ Jadwal Poskamling minggu ini telah diperbarui.",
 ];
 
+const quickAccess = [
+  { label: "Pengumuman", to: "/media", icon: Megaphone, tone: "from-amber-500 to-orange-500" },
+  { label: "Agenda", to: "/administrasi", icon: CalendarCheck, tone: "from-fuchsia-500 to-pink-500" },
+  { label: "Transparansi Kas", to: "/keuangan", icon: Wallet, tone: "from-emerald-500 to-teal-500" },
+  { label: "Emergency Center", to: "/emergency", icon: Siren, tone: "from-red-500 to-rose-600" },
+  { label: "UMKM Warga", to: "/umkm", icon: Store, tone: "from-cyan-500 to-blue-500" },
+  { label: "Kritik & Saran", to: "/kritik-saran", icon: MessageSquareWarning, tone: "from-violet-500 to-purple-500" },
+] as const;
+
+const visitorStats = [
+  { label: "Online Sekarang", value: 27, icon: Wifi, tone: "from-emerald-500 to-teal-500", live: true },
+  { label: "Pengunjung Hari Ini", value: 184, icon: Activity, tone: "from-blue-500 to-indigo-500" },
+  { label: "Pengunjung Bulan Ini", value: "3.412", icon: CalendarRange, tone: "from-violet-500 to-fuchsia-500" },
+];
+
 function Dashboard() {
   const [time, setTime] = useState<Date | null>(null);
   const [spinning, setSpinning] = useState(false);
@@ -64,6 +81,22 @@ function Dashboard() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-5">
+      {/* Running text — tepat di bawah header */}
+      <div className="overflow-hidden rounded-2xl glass border border-primary/20">
+        <div className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3 py-2">
+          <div className="shrink-0 h-7 px-2.5 rounded-lg gradient-primary text-primary-foreground text-[10px] font-bold flex items-center gap-1.5">
+            <Megaphone className="h-3 w-3" /> INFO
+          </div>
+          <div className="overflow-hidden flex-1">
+            <div className="flex gap-10 whitespace-nowrap animate-marquee text-xs sm:text-sm font-medium">
+              {[...announcements, ...announcements].map((a, i) => (
+                <span key={i} className="text-foreground/90">{a}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Hero Header */}
       <section className="relative overflow-hidden rounded-3xl glass-strong p-5 sm:p-7">
         <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full gradient-primary opacity-20 blur-3xl" />
@@ -96,21 +129,67 @@ function Dashboard() {
           <ClockCard icon={<CalendarDays className="h-4 w-4" />} label="Hari" value={hari} />
           <ClockCard icon={<CalendarDays className="h-4 w-4" />} label="Tanggal" value={tanggal} />
         </div>
+      </section>
 
-        {/* Running text */}
-        <div className="relative mt-5 overflow-hidden rounded-2xl bg-primary/10 border border-primary/20">
-          <div className="flex items-center gap-3 px-3 py-2.5">
-            <div className="shrink-0 h-7 px-2.5 rounded-lg gradient-primary text-primary-foreground text-[10px] font-bold flex items-center gap-1.5">
-              <Megaphone className="h-3 w-3" /> INFO
-            </div>
-            <div className="overflow-hidden flex-1">
-              <div className="flex gap-12 whitespace-nowrap animate-marquee text-sm font-medium">
-                {[...announcements, ...announcements].map((a, i) => (
-                  <span key={i} className="text-foreground/90">{a}</span>
-                ))}
-              </div>
-            </div>
+      {/* Quick Access */}
+      <section>
+        <div className="flex items-end justify-between mb-3 px-1">
+          <div>
+            <h2 className="text-base sm:text-lg font-bold">Akses Cepat</h2>
+            <p className="text-xs text-muted-foreground">Pintasan ke fitur utama warga</p>
           </div>
+        </div>
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5 sm:gap-3">
+          {quickAccess.map((q) => {
+            const Icon = q.icon;
+            return (
+              <Link
+                key={q.label}
+                to={q.to}
+                className="glass-strong rounded-2xl p-3 sm:p-4 flex flex-col items-center gap-2 text-center hover:translate-y-[-2px] transition group"
+              >
+                <div className={`h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-gradient-to-br ${q.tone} text-white grid place-items-center shadow-soft group-hover:shadow-glow transition`}>
+                  <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                </div>
+                <div className="text-[11px] sm:text-xs font-semibold leading-tight">{q.label}</div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Visitor Stats */}
+      <section>
+        <div className="flex items-end justify-between mb-3 px-1">
+          <div>
+            <h2 className="text-base sm:text-lg font-bold">Statistik Pengunjung</h2>
+            <p className="text-xs text-muted-foreground">Aktivitas kunjungan portal warga</p>
+          </div>
+          <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1">
+            <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Realtime
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
+          {visitorStats.map((v) => {
+            const Icon = v.icon;
+            return (
+              <div key={v.label} className="glass-strong rounded-2xl p-3 sm:p-5 relative overflow-hidden">
+                <div className={`absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br ${v.tone} opacity-20 blur-xl`} />
+                <div className="flex items-center gap-2 relative">
+                  <div className={`h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br ${v.tone} text-white grid place-items-center shrink-0 shadow-soft`}>
+                    <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </div>
+                  {v.live && (
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-success/15 text-success flex items-center gap-1">
+                      <span className="h-1 w-1 rounded-full bg-success animate-pulse" /> LIVE
+                    </span>
+                  )}
+                </div>
+                <div className="mt-2.5 text-[10px] sm:text-xs text-muted-foreground font-medium leading-tight">{v.label}</div>
+                <div className="text-lg sm:text-2xl font-extrabold leading-tight mt-0.5 tabular-nums">{v.value}</div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
