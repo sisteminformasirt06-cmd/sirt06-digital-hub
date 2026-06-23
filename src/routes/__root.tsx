@@ -14,9 +14,11 @@ import logoUrl from "../assets/logo-rt.png";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeProvider } from "../lib/theme-context";
 import { MusicProvider } from "../lib/music-context";
+import { AuthProvider } from "../lib/auth-context";
 import { AppShell } from "../components/app-shell";
 import { FloatingMusicPlayer } from "../components/music-player";
 import { FloatingEmergencyButton } from "../components/emergency-button";
+import { Footer } from "../components/footer";
 
 function NotFoundComponent() {
   return (
@@ -131,13 +133,16 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <MusicProvider>
-          <AppShell>
-            <Outlet />
-          </AppShell>
-          <FloatingMusicPlayer />
-          <FloatingEmergencyButton />
-        </MusicProvider>
+        <AuthProvider>
+          <MusicProvider>
+            <AppShell>
+              <Outlet />
+              <Footer />
+            </AppShell>
+            <FloatingMusicPlayer />
+            <FloatingEmergencyButton />
+          </MusicProvider>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

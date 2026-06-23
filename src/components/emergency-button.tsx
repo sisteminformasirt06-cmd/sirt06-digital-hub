@@ -63,7 +63,7 @@ export function FloatingEmergencyButton() {
       <button
         onClick={() => setOpen(true)}
         aria-label="Emergency Center"
-        className="fixed bottom-4 left-4 z-50 h-14 w-14 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-[0_10px_30px_-5px_rgba(244,63,94,0.6)] grid place-items-center animate-pulse-ring"
+        className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+1rem)] left-4 z-40 h-14 w-14 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-[0_10px_30px_-5px_rgba(244,63,94,0.6)] grid place-items-center animate-pulse-ring"
       >
         <Siren className="h-6 w-6" />
         <span className="sr-only">Emergency</span>
