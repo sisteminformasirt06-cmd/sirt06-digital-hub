@@ -15,6 +15,7 @@ import { ThemeProvider } from "../lib/theme-context";
 import { MusicProvider } from "../lib/music-context";
 import { AppShell } from "../components/app-shell";
 import { FloatingMusicPlayer } from "../components/music-player";
+import { FloatingEmergencyButton } from "../components/emergency-button";
 
 function NotFoundComponent() {
   return (
@@ -132,6 +133,7 @@ function RootComponent() {
             <Outlet />
           </AppShell>
           <FloatingMusicPlayer />
+          <FloatingEmergencyButton />
         </MusicProvider>
       </ThemeProvider>
     </QueryClientProvider>
