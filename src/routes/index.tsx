@@ -225,6 +225,87 @@ function Dashboard() {
         </div>
       </section>
 
+      {/* Agenda Hari Ini + Status Sistem */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+        <div className="glass-strong rounded-2xl p-4 sm:p-5 md:col-span-2">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="h-9 w-9 rounded-xl gradient-primary text-primary-foreground grid place-items-center shadow-soft">
+                <CalendarCheck className="h-4 w-4" />
+              </div>
+              <div>
+                <h3 className="font-bold text-sm sm:text-base leading-tight">Agenda Hari Ini</h3>
+                <p className="text-[11px] text-muted-foreground">{hari}, {tanggal}</p>
+              </div>
+            </div>
+            <Link to="/administrasi" className="text-[11px] text-primary font-semibold flex items-center gap-1 hover:underline">
+              Semua <ArrowUpRight className="h-3 w-3" />
+            </Link>
+          </div>
+          {agendaHariIni.length === 0 ? (
+            <div className="flex flex-col items-center justify-center text-center py-8 px-3 rounded-xl border border-dashed border-border/60">
+              <div className="h-12 w-12 rounded-2xl bg-muted grid place-items-center mb-2">
+                <CalendarX className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div className="text-sm font-semibold">Tidak ada agenda hari ini</div>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Jadwal kegiatan akan tampil di sini saat tersedia.</p>
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {agendaHariIni.map((a, i) => (
+                <li key={i} className="flex items-center gap-3 p-2.5 rounded-xl glass">
+                  <div className="h-10 w-10 rounded-xl gradient-primary text-primary-foreground grid place-items-center shrink-0">
+                    <Clock className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-semibold truncate">{a.nama}</div>
+                    <div className="text-[11px] text-muted-foreground truncate">{a.jam} • {a.tempat}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="glass-strong rounded-2xl p-4 sm:p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white grid place-items-center shadow-soft">
+              <Database className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm sm:text-base leading-tight">Status Sistem</h3>
+              <p className="text-[11px] text-muted-foreground">Kondisi platform</p>
+            </div>
+          </div>
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between p-2.5 rounded-xl glass">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="relative flex h-2.5 w-2.5 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-60" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success" />
+                </span>
+                <span className="text-xs font-semibold truncate">Sistem Online</span>
+              </div>
+              <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+            </div>
+            <div className="p-2.5 rounded-xl glass">
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Backup Terakhir</div>
+              <div className="text-xs font-bold tabular-nums mt-0.5 truncate">{backupTerakhir}</div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="p-2.5 rounded-xl glass text-center">
+                <div className="text-[10px] text-muted-foreground">Uptime</div>
+                <div className="text-sm font-extrabold text-success">99.9%</div>
+              </div>
+              <div className="p-2.5 rounded-xl glass text-center">
+                <div className="text-[10px] text-muted-foreground">Versi</div>
+                <div className="text-sm font-extrabold">1.0.0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Quick actions / cards */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="glass-strong rounded-2xl p-5 lg:col-span-2">
