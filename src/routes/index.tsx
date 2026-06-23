@@ -5,6 +5,7 @@ import {
   Users, Home, Wallet, Megaphone, CalendarCheck, Eye,
   RefreshCw, Clock, CalendarDays, TrendingUp, ArrowUpRight,
   Siren, Store, MessageSquareWarning, Wifi, Activity, CalendarRange,
+  CheckCircle2, Database, CalendarX, MapPin,
 } from "lucide-react";
 import logo from "@/assets/logo-rt.png";
 
@@ -74,6 +75,13 @@ function Dashboard() {
   const hari = time ? HARI[time.getDay()] : "—";
   const tanggal = time ? `${time.getDate()} ${BULAN[time.getMonth()]} ${time.getFullYear()}` : "—";
 
+  // Demo: agenda hari ini (kosong by default — diisi dari modul Administrasi nanti)
+  const agendaHariIni: { nama: string; jam: string; tempat: string }[] = [];
+
+  const backupTerakhir = time
+    ? `${time.getDate()} ${BULAN[time.getMonth()]} ${time.getFullYear()} • 03:00 WIB`
+    : "—";
+
   const handleRefresh = () => {
     setSpinning(true);
     setTimeout(() => setSpinning(false), 800);
@@ -106,11 +114,17 @@ function Dashboard() {
           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
             <img src={logo} alt="Logo RT 06 RW 07 Bogeman Wetan" className="h-14 w-14 sm:h-20 sm:w-20 rounded-2xl shadow-glow shrink-0" />
             <div className="min-w-0">
-              <div className="text-[10px] sm:text-xs uppercase tracking-widest text-primary font-bold">RT 06 / RW 07 — Bogeman Wetan</div>
+              <div className="text-[10px] sm:text-xs uppercase tracking-widest text-primary font-bold flex items-center gap-1.5">
+                <span>👋</span> Selamat Datang
+              </div>
               <h1 className="text-xl sm:text-3xl font-extrabold leading-tight">
                 Sistem Informasi <span className="text-gradient-primary">RT 06</span>
               </h1>
               <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Digitalisasi dan Transparansi</p>
+              <p className="text-[11px] sm:text-xs text-muted-foreground/80 mt-0.5 flex items-center gap-1">
+                <MapPin className="h-3 w-3 shrink-0" />
+                <span className="truncate">Warga RT 06 RW 07 Bogeman Wetan</span>
+              </p>
             </div>
           </div>
 
