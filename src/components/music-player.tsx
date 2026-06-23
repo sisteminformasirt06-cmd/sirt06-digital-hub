@@ -16,7 +16,7 @@ export function FloatingMusicPlayer() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 select-none">
+    <div className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+1rem)] right-4 z-40 select-none">
       <div
         className={cn(
           "glass-strong rounded-2xl overflow-hidden transition-all duration-300",

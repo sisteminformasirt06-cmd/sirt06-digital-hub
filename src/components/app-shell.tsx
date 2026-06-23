@@ -1,8 +1,9 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { Menu, Moon, Sun, RefreshCw, Bell } from "lucide-react";
+import { Menu, Moon, Sun, RefreshCw, Bell, LogIn, ShieldCheck } from "lucide-react";
 import logo from "@/assets/logo-rt.png";
 import { useTheme } from "@/lib/theme-context";
+import { useAuth } from "@/lib/auth-context";
 import { navItems } from "./nav-config";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +11,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [openMobile, setOpenMobile] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { theme, toggle } = useTheme();
+  const { user } = useAuth();
 
   useEffect(() => setOpenMobile(false), [pathname]);
 
@@ -50,6 +52,17 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
 
             <div className="flex-1" />
+
+            {user ? (
+              <Link to="/login" title={`${user.nama} · ${user.role}`} className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl glass text-xs font-semibold">
+                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                <span className="max-w-[120px] truncate">{user.nama}</span>
+              </Link>
+            ) : (
+              <Link to="/login" className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold shadow-glow">
+                <LogIn className="h-3.5 w-3.5" /> Login
+              </Link>
+            )}
 
             <button
               onClick={() => window.location.reload()}
