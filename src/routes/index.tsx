@@ -104,12 +104,12 @@ function Dashboard() {
     <div className="max-w-7xl mx-auto space-y-5">
       {/* Running text — tepat di bawah header */}
       <div className="overflow-hidden rounded-2xl glass border border-primary/20">
-        <div className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3 py-2">
-          <div className="shrink-0 h-7 px-2.5 rounded-lg gradient-primary text-primary-foreground text-[10px] font-bold flex items-center gap-1.5">
+        <div className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3 py-2.5">
+          <div className="shrink-0 h-8 px-2.5 rounded-lg gradient-primary text-primary-foreground text-[11px] font-bold flex items-center gap-1.5 shadow-soft">
             <Megaphone className="h-3 w-3" /> INFO
           </div>
-          <div className="overflow-hidden flex-1">
-            <div className="flex gap-10 whitespace-nowrap animate-marquee text-xs sm:text-sm font-medium">
+          <div className="overflow-hidden flex-1 [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
+            <div className="flex gap-10 whitespace-nowrap animate-marquee text-[13px] sm:text-sm font-medium">
               {[...announcements, ...announcements].map((a, i) => (
                 <span key={i} className="text-foreground/90">{a}</span>
               ))}
