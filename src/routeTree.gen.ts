@@ -22,6 +22,7 @@ import { Route as KeuanganRouteImport } from './routes/keuangan'
 import { Route as InventarisRouteImport } from './routes/inventaris'
 import { Route as EmergencyRouteImport } from './routes/emergency'
 import { Route as AdministrasiRouteImport } from './routes/administrasi'
+import { Route as AbsensiRouteImport } from './routes/absensi'
 import { Route as IndexRouteImport } from './routes/index'
 
 const WhatsappRoute = WhatsappRouteImport.update({
@@ -89,6 +90,11 @@ const AdministrasiRoute = AdministrasiRouteImport.update({
   path: '/administrasi',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AbsensiRoute = AbsensiRouteImport.update({
+  id: '/absensi',
+  path: '/absensi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -97,6 +103,7 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/absensi': typeof AbsensiRoute
   '/administrasi': typeof AdministrasiRoute
   '/emergency': typeof EmergencyRoute
   '/inventaris': typeof InventarisRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/absensi': typeof AbsensiRoute
   '/administrasi': typeof AdministrasiRoute
   '/emergency': typeof EmergencyRoute
   '/inventaris': typeof InventarisRoute
@@ -130,6 +138,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/absensi': typeof AbsensiRoute
   '/administrasi': typeof AdministrasiRoute
   '/emergency': typeof EmergencyRoute
   '/inventaris': typeof InventarisRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/absensi'
     | '/administrasi'
     | '/emergency'
     | '/inventaris'
@@ -164,6 +174,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/absensi'
     | '/administrasi'
     | '/emergency'
     | '/inventaris'
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/absensi'
     | '/administrasi'
     | '/emergency'
     | '/inventaris'
@@ -197,6 +209,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AbsensiRoute: typeof AbsensiRoute
   AdministrasiRoute: typeof AdministrasiRoute
   EmergencyRoute: typeof EmergencyRoute
   InventarisRoute: typeof InventarisRoute
@@ -305,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdministrasiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/absensi': {
+      id: '/absensi'
+      path: '/absensi'
+      fullPath: '/absensi'
+      preLoaderRoute: typeof AbsensiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -317,6 +337,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AbsensiRoute: AbsensiRoute,
   AdministrasiRoute: AdministrasiRoute,
   EmergencyRoute: EmergencyRoute,
   InventarisRoute: InventarisRoute,
