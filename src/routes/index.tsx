@@ -55,12 +55,6 @@ const quickAccess = [
   { label: "Kritik & Saran", to: "/kritik-saran", icon: MessageSquareWarning, tone: "from-violet-500 to-purple-500" },
 ] as const;
 
-const visitorStats = [
-  { label: "Online Sekarang", value: 27, icon: Wifi, tone: "from-emerald-500 to-teal-500", live: true },
-  { label: "Pengunjung Hari Ini", value: 184, icon: Activity, tone: "from-blue-500 to-indigo-500" },
-  { label: "Pengunjung Bulan Ini", value: "3.412", icon: CalendarRange, tone: "from-violet-500 to-fuchsia-500" },
-];
-
 function Dashboard() {
   const [time, setTime] = useState<Date | null>(null);
   const [spinning, setSpinning] = useState(false);
