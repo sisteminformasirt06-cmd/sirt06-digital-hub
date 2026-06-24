@@ -64,12 +64,31 @@ const visitorStats = [
 function Dashboard() {
   const [time, setTime] = useState<Date | null>(null);
   const [spinning, setSpinning] = useState(false);
+  const [online, setOnline] = useState(27);
+  const [today, setToday] = useState(184);
+  const [month, setMonth] = useState(3412);
 
   useEffect(() => {
     setTime(nowWIB());
     const id = setInterval(() => setTime(nowWIB()), 1000);
     return () => clearInterval(id);
   }, []);
+
+  // Realtime visitor simulation (lightweight)
+  useEffect(() => {
+    const id = setInterval(() => {
+      setOnline((v) => Math.max(8, Math.min(60, v + Math.round((Math.random() - 0.5) * 4))));
+      setToday((v) => v + (Math.random() < 0.35 ? 1 : 0));
+      setMonth((v) => v + (Math.random() < 0.15 ? 1 : 0));
+    }, 4000);
+    return () => clearInterval(id);
+  }, []);
+
+  const liveVisitorStats = [
+    { label: "Online Sekarang", value: online, icon: Wifi, tone: "from-emerald-500 to-teal-500", live: true },
+    { label: "Pengunjung Hari Ini", value: today.toLocaleString("id-ID"), icon: Activity, tone: "from-blue-500 to-indigo-500" },
+    { label: "Pengunjung Bulan Ini", value: month.toLocaleString("id-ID"), icon: CalendarRange, tone: "from-violet-500 to-fuchsia-500" },
+  ];
 
   const jam = time ? `${String(time.getHours()).padStart(2, "0")}:${String(time.getMinutes()).padStart(2, "0")}:${String(time.getSeconds()).padStart(2, "0")}` : "--:--:--";
   const hari = time ? HARI[time.getDay()] : "—";
@@ -184,7 +203,7 @@ function Dashboard() {
           </div>
         </div>
         <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
-          {visitorStats.map((v) => {
+          {liveVisitorStats.map((v) => {
             const Icon = v.icon;
             return (
               <div key={v.label} className="glass-strong rounded-2xl p-3 sm:p-5 relative overflow-hidden">
@@ -200,7 +219,7 @@ function Dashboard() {
                   )}
                 </div>
                 <div className="mt-2.5 text-[10px] sm:text-xs text-muted-foreground font-medium leading-tight">{v.label}</div>
-                <div className="text-lg sm:text-2xl font-extrabold leading-tight mt-0.5 tabular-nums">{v.value}</div>
+                <div className="text-lg sm:text-2xl font-extrabold leading-tight mt-0.5 tabular-nums transition-all">{v.value}</div>
               </div>
             );
           })}
