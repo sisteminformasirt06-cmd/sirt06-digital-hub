@@ -8,6 +8,8 @@ import {
   CheckCircle2, Database, CalendarX, MapPin,
 } from "lucide-react";
 import logo from "@/assets/logo-rt.png";
+import { loadLS } from "@/lib/storage";
+import { PENGUMUMAN_KEY, isAktif, type Pengumuman } from "./media";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,7 +40,7 @@ const stats = [
   { label: "Pengunjung Online", value: 27, icon: Eye, trend: "Live", tone: "from-violet-500 to-purple-500" },
 ];
 
-const announcements = [
+const DEFAULT_ANNOUNCEMENTS = [
   "📢 Kerja bakti rutin Minggu pagi pukul 06.30 WIB di balai RT.",
   "💧 Pemeliharaan saluran air dijadwalkan Kamis sore.",
   "🎉 Lomba 17 Agustus segera dimulai — pendaftaran terbuka.",
@@ -61,6 +63,24 @@ function Dashboard() {
   const [online, setOnline] = useState(27);
   const [today, setToday] = useState(184);
   const [month, setMonth] = useState(3412);
+  const [announcements, setAnnouncements] = useState<string[]>(DEFAULT_ANNOUNCEMENTS);
+
+  useEffect(() => {
+    const refresh = () => {
+      const list = loadLS<Pengumuman[]>(PENGUMUMAN_KEY, []);
+      const now = new Date();
+      const aktif = list
+        .filter((p) => isAktif(p, now))
+        .sort((a, b) => (a.prioritas === b.prioritas ? 0 : a.prioritas === "Penting" ? -1 : 1))
+        .map((p) => `${p.prioritas === "Penting" ? "⚠️" : "📢"} ${p.judul}`);
+      setAnnouncements(aktif.length ? aktif : DEFAULT_ANNOUNCEMENTS);
+    };
+    refresh();
+    const onStorage = (e: StorageEvent) => { if (e.key === PENGUMUMAN_KEY) refresh(); };
+    window.addEventListener("storage", onStorage);
+    const id = setInterval(refresh, 30000);
+    return () => { window.removeEventListener("storage", onStorage); clearInterval(id); };
+  }, []);
 
   useEffect(() => {
     setTime(nowWIB());
