@@ -16,7 +16,7 @@ export const navItems = [
   { to: "/umkm", label: "UMKM Warga", icon: Store },
   { to: "/kritik-saran", label: "Kritik & Saran", icon: MessageSquareWarning },
   { to: "/emergency", label: "Emergency Center", icon: Siren },
-  { to: "/media", label: "Media Center", icon: Newspaper },
+  { to: "/media", label: "Pengumuman", icon: Newspaper },
   { to: "/whatsapp", label: "WhatsApp Center", icon: MessageCircle },
   { to: "/pengaturan", label: "Pengaturan", icon: Settings },
 ] as const;
