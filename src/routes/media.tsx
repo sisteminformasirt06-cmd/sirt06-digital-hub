@@ -39,31 +39,7 @@ export interface Pengumuman {
 
 export const PENGUMUMAN_KEY = "sirt06_pengumuman_v1";
 
-const SEED: Pengumuman[] = [
-  {
-    id: uid("pgm"),
-    judul: "Kerja Bakti Rutin Minggu Pagi",
-    isi: "Seluruh warga RT 06 dimohon hadir untuk kerja bakti membersihkan lingkungan pada Minggu pagi pukul 06.30 WIB. Berkumpul di balai RT.",
-    prioritas: "Penting",
-    publishedAt: new Date().toISOString().slice(0, 10),
-    expiresAt: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
-    petugas: "Ketua RT",
-    createdAt: nowISO(),
-    updatedAt: nowISO(),
-    archived: false,
-  },
-  {
-    id: uid("pgm"),
-    judul: "Iuran Kas Bulanan",
-    isi: "Mohon iuran kas bulan ini diserahkan kepada Bendahara RT paling lambat tanggal 25.",
-    prioritas: "Normal",
-    publishedAt: new Date().toISOString().slice(0, 10),
-    petugas: "Bendahara RT",
-    createdAt: nowISO(),
-    updatedAt: nowISO(),
-    archived: false,
-  },
-];
+const SEED: Pengumuman[] = [];
 
 export function isAktif(p: Pengumuman, now = new Date()) {
   if (p.archived) return false;
