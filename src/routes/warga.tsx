@@ -287,9 +287,15 @@ export function PageHeader({ title, desc, icon: Icon }: { title: string; desc: s
   );
 }
 
-export function DataTable({ headers, rows, empty }: { headers: React.ReactNode[]; rows: React.ReactNode[][]; empty: string }) {
+export function DataTable({ headers, rows, empty, action }: { headers: React.ReactNode[]; rows: React.ReactNode[][]; empty: string; action?: React.ReactNode }) {
   if (rows.length === 0) {
-    return <div className="glass rounded-2xl p-8 text-center text-sm text-muted-foreground">{empty}</div>;
+    return (
+      <div className="glass rounded-2xl p-8 text-center space-y-3">
+        <div className="text-sm font-semibold">{empty}</div>
+        <p className="text-[11px] text-muted-foreground max-w-xs mx-auto">Tidak ada data yang tersedia. Mulai dengan menambahkan data baru.</p>
+        {action ? <div className="pt-1">{action}</div> : null}
+      </div>
+    );
   }
   return (
     <div className="glass rounded-2xl overflow-x-auto">

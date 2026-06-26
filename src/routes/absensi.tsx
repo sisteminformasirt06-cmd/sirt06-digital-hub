@@ -44,50 +44,17 @@ interface Kehadiran {
   waktu: string;
 }
 
-const WARGA_DUMMY = [
-  "Pak Sudarmaji", "Bu Sri Wahyuni", "Pak Bambang Setiawan", "Bu Endang Lestari",
-  "Pak Hadi Susanto", "Bu Marwati", "Pak Joko Prasetyo", "Bu Nuraini",
-  "Pak Slamet Riyadi", "Bu Wati Rahmawati", "Pak Agus Santoso", "Bu Yuliana",
-  "Pak Suharto", "Bu Rina Marlina", "Pak Wahyudi", "Bu Siti Aminah",
-  "Pak Darmanto", "Bu Tuti Hartati", "Pak Edi Purnomo", "Bu Sumarni",
-  "Pak Mulyono", "Bu Lilis Suryani", "Pak Heri Kuswanto", "Bu Ratna Dewi",
-  "Pak Sutrisno", "Bu Indah Permata", "Pak Yanto", "Bu Nani Suryani",
-  "Pak Rohmat", "Bu Asih Pujiastuti",
-];
-
-const DEFAULT_KEGIATAN: Kegiatan[] = [
-  {
-    id: "k_demo_1", nama: "Kerja Bakti Lingkungan RT 06", jenis: "Kerja Bakti",
-    tanggal: new Date(Date.now() + 86400000).toISOString().slice(0, 10), jam: "06:30",
-    lokasi: "Sepanjang Jalan Bogeman Wetan", deskripsi: "Bersih-bersih saluran air dan taman RT.",
-    qrToken: "RT06-KB-A1B2C3",
-    qrExpiresAt: new Date(Date.now() + 86400000 + 3 * 3600000).toISOString(), qrDurasiMenit: 180,
-    createdBy: "Sekretaris RT", createdAt: nowISO(),
-  },
-  {
-    id: "k_demo_2", nama: "Rapat Bulanan Pengurus & Warga", jenis: "Rapat RT",
-    tanggal: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10), jam: "19:30",
-    lokasi: "Balai RT 06", deskripsi: "Evaluasi kas dan rencana HUT RI.",
-    qrToken: "RT06-RP-D4E5F6",
-    qrExpiresAt: new Date(Date.now() + 7 * 86400000 + 2 * 3600000).toISOString(), qrDurasiMenit: 120,
-    createdBy: "Ketua RT", createdAt: nowISO(),
-  },
-  {
-    id: "k_demo_3", nama: "Posyandu Balita & Lansia", jenis: "Posyandu",
-    tanggal: new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10), jam: "08:00",
-    lokasi: "Posyandu Melati", deskripsi: "Pemeriksaan rutin balita & lansia.",
-    qrToken: "RT06-PS-G7H8I9",
-    qrExpiresAt: new Date(Date.now() - 3 * 86400000 + 4 * 3600000).toISOString(), qrDurasiMenit: 240,
-    createdBy: "Sie Sosial", createdAt: nowISO(),
-  },
-];
-
-const DEFAULT_KEHADIRAN: Kehadiran[] = WARGA_DUMMY.slice(0, 22).map((n, i) => ({
-  id: `h_seed_${i}`,
-  kegiatanId: "k_demo_3",
-  nama: n,
-  waktu: new Date(Date.now() - 3 * 86400000 + i * 60000).toISOString(),
-}));
+const DEFAULT_KEGIATAN: Kegiatan[] = [];
+const DEFAULT_KEHADIRAN: Kehadiran[] = [];
+function getWargaNames(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem("sirt06_warga_v1");
+    if (!raw) return [];
+    const arr = JSON.parse(raw) as { nama: string }[];
+    return Array.isArray(arr) ? arr.map((w) => w.nama).filter(Boolean) : [];
+  } catch { return []; }
+}
 
 type Tab = "kegiatan" | "scan" | "rekap" | "riwayat" | "statistik";
 
@@ -176,7 +143,7 @@ function AbsensiPage() {
         />
       )}
       {tab === "scan" && <ScanPanel onCheckIn={checkIn} kegiatan={sortedKegiatan} />}
-      {tab === "rekap" && <RekapPanel kegiatan={sortedKegiatan} hadir={hadir} totalWarga={WARGA_DUMMY.length} />}
+      {tab === "rekap" && <RekapPanel kegiatan={sortedKegiatan} hadir={hadir} totalWarga={getWargaNames().length} />}
       {tab === "riwayat" && <RiwayatPanel kegiatan={kegiatan} hadir={hadir} />}
       {tab === "statistik" && <StatistikPanel kegiatan={kegiatan} hadir={hadir} />}
 
@@ -469,7 +436,7 @@ function ScanPanel({ onCheckIn, kegiatan }: { onCheckIn: (token: string, nama: s
   useEffect(() => {
     if (!nama.trim()) { setSugg([]); return; }
     const q = nama.toLowerCase();
-    setSugg(WARGA_DUMMY.filter((n) => n.toLowerCase().includes(q) && n.toLowerCase() !== q).slice(0, 5));
+    setSugg(getWargaNames().filter((n) => n.toLowerCase().includes(q) && n.toLowerCase() !== q).slice(0, 5));
   }, [nama]);
 
   useEffect(() => {

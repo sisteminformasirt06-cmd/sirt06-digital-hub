@@ -10,6 +10,8 @@ import {
 import logo from "@/assets/logo-rt.png";
 import { loadLS } from "@/lib/storage";
 import { PENGUMUMAN_KEY, isAktif, type Pengumuman } from "./media";
+import { useSettings } from "@/lib/settings-context";
+import { rupiah } from "@/lib/storage";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,22 +33,7 @@ function nowWIB() {
   return new Date(utc + 7 * 3600000);
 }
 
-const stats = [
-  { label: "Total Warga", value: 342, icon: Users, trend: "+12", tone: "from-blue-500 to-indigo-500" },
-  { label: "Total KK", value: 98, icon: Home, trend: "+3", tone: "from-cyan-500 to-blue-500" },
-  { label: "Total Kas", value: "Rp 18.450.000", icon: Wallet, trend: "+8%", tone: "from-emerald-500 to-teal-500" },
-  { label: "Pengumuman Aktif", value: 6, icon: Megaphone, trend: "Baru", tone: "from-amber-500 to-orange-500" },
-  { label: "Agenda Aktif", value: 4, icon: CalendarCheck, trend: "Mingguan", tone: "from-fuchsia-500 to-pink-500" },
-  { label: "Pengunjung Online", value: 27, icon: Eye, trend: "Live", tone: "from-violet-500 to-purple-500" },
-];
-
-const DEFAULT_ANNOUNCEMENTS = [
-  "📢 Kerja bakti rutin Minggu pagi pukul 06.30 WIB di balai RT.",
-  "💧 Pemeliharaan saluran air dijadwalkan Kamis sore.",
-  "🎉 Lomba 17 Agustus segera dimulai — pendaftaran terbuka.",
-  "💰 Iuran kas bulan ini mohon diserahkan ke Bendahara RT.",
-  "🛡️ Jadwal Poskamling minggu ini telah diperbarui.",
-];
+const DEFAULT_ANNOUNCEMENTS: string[] = [];
 
 const quickAccess = [
   { label: "Pengumuman", to: "/media", icon: Megaphone, tone: "from-amber-500 to-orange-500" },
@@ -58,12 +45,42 @@ const quickAccess = [
 ] as const;
 
 function Dashboard() {
+  const { identity, kasSaldoAwal } = useSettings();
   const [time, setTime] = useState<Date | null>(null);
   const [spinning, setSpinning] = useState(false);
-  const [online, setOnline] = useState(27);
-  const [today, setToday] = useState(184);
-  const [month, setMonth] = useState(3412);
+  const [online, setOnline] = useState(0);
+  const [today, setToday] = useState(0);
+  const [month, setMonth] = useState(0);
   const [announcements, setAnnouncements] = useState<string[]>(DEFAULT_ANNOUNCEMENTS);
+  const [counts, setCounts] = useState({ warga: 0, kk: 0, kas: 0, pengumumanAktif: 0, agenda: 0 });
+
+  useEffect(() => {
+    const refresh = () => {
+      const warga = loadLS<unknown[]>("sirt06_warga_v1", []);
+      const kk = loadLS<unknown[]>("sirt06_kk_v1", []);
+      const trx = loadLS<{ kas: string; tipe: string; jumlah: number }[]>("sirt06_trx_v1", []);
+      let totalKas = 0;
+      Object.values(kasSaldoAwal).forEach((v) => (totalKas += Number(v) || 0));
+      trx.forEach((t) => { totalKas += t.tipe === "Masuk" ? t.jumlah : -t.jumlah; });
+      const pgm = loadLS<Pengumuman[]>(PENGUMUMAN_KEY, []);
+      const now = new Date();
+      const aktif = pgm.filter((p) => isAktif(p, now)).length;
+      const agenda = loadLS<unknown[]>("sirt06_kegiatan_v1", []).length;
+      setCounts({ warga: warga.length, kk: kk.length, kas: totalKas, pengumumanAktif: aktif, agenda });
+    };
+    refresh();
+    const id = setInterval(refresh, 10000);
+    return () => clearInterval(id);
+  }, [kasSaldoAwal]);
+
+  const stats = [
+    { label: "Total Warga", value: counts.warga, icon: Users, trend: counts.warga ? "Live" : "—", tone: "from-blue-500 to-indigo-500" },
+    { label: "Total KK", value: counts.kk, icon: Home, trend: counts.kk ? "Live" : "—", tone: "from-cyan-500 to-blue-500" },
+    { label: "Total Kas", value: rupiah(counts.kas), icon: Wallet, trend: "Live", tone: "from-emerald-500 to-teal-500" },
+    { label: "Pengumuman Aktif", value: counts.pengumumanAktif, icon: Megaphone, trend: counts.pengumumanAktif ? "Aktif" : "—", tone: "from-amber-500 to-orange-500" },
+    { label: "Agenda", value: counts.agenda, icon: CalendarCheck, trend: counts.agenda ? "Tersedia" : "—", tone: "from-fuchsia-500 to-pink-500" },
+    { label: "Pengunjung Online", value: online, icon: Eye, trend: "Live", tone: "from-violet-500 to-purple-500" },
+  ];
 
   useEffect(() => {
     const refresh = () => {
@@ -73,7 +90,7 @@ function Dashboard() {
         .filter((p) => isAktif(p, now))
         .sort((a, b) => (a.prioritas === b.prioritas ? 0 : a.prioritas === "Penting" ? -1 : 1))
         .map((p) => `${p.prioritas === "Penting" ? "⚠️" : "📢"} ${p.judul}`);
-      setAnnouncements(aktif.length ? aktif : DEFAULT_ANNOUNCEMENTS);
+      setAnnouncements(aktif);
     };
     refresh();
     const onStorage = (e: StorageEvent) => { if (e.key === PENGUMUMAN_KEY) refresh(); };
@@ -130,7 +147,7 @@ function Dashboard() {
           </div>
           <div className="overflow-hidden flex-1 [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
             <div className="flex gap-10 whitespace-nowrap animate-marquee text-[13px] sm:text-sm font-medium">
-              {[...announcements, ...announcements].map((a, i) => (
+              {(announcements.length ? [...announcements, ...announcements] : ["Belum ada pengumuman aktif. Buat di menu Pengumuman."]).map((a, i) => (
                 <span key={i} className="text-foreground/90">{a}</span>
               ))}
             </div>
@@ -151,12 +168,12 @@ function Dashboard() {
                 <span>👋</span> Selamat Datang
               </div>
               <h1 className="text-xl sm:text-3xl font-extrabold leading-tight">
-                Sistem Informasi <span className="text-gradient-primary">RT 06</span>
+                Sistem Informasi <span className="text-gradient-primary">{identity.namaRT || "RT 06"}</span>
               </h1>
               <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Digitalisasi dan Transparansi</p>
               <p className="text-[11px] sm:text-xs text-muted-foreground/80 mt-0.5 flex items-center gap-1">
                 <MapPin className="h-3 w-3 shrink-0" />
-                <span className="truncate">Warga RT 06 RW 07 Bogeman Wetan</span>
+                <span className="truncate">Warga RT {identity.nomorRT || "06"} RW {identity.nomorRW || "07"} {identity.namaLingkungan || "Bogeman Wetan"}</span>
               </p>
             </div>
           </div>
@@ -339,58 +356,33 @@ function Dashboard() {
         </div>
       </section>
 
-      {/* Quick actions / cards */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="glass-strong rounded-2xl p-5 lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold">Aktivitas Terbaru</h3>
-            <button className="text-xs text-primary font-semibold flex items-center gap-1 hover:underline">
-              Lihat semua <ArrowUpRight className="h-3 w-3" />
-            </button>
+            <Link to="/pengaturan" className="text-xs text-primary font-semibold flex items-center gap-1 hover:underline">
+              Audit Log <ArrowUpRight className="h-3 w-3" />
+            </Link>
           </div>
-          <ul className="space-y-3">
-            {[
-              { t: "Iuran kas diterima dari Bp. Ahmad", time: "5 menit lalu", c: "bg-success/15 text-success" },
-              { t: "Pengajuan surat domisili oleh Ibu Sari", time: "1 jam lalu", c: "bg-primary/15 text-primary" },
-              { t: "Agenda rapat warga ditambahkan", time: "3 jam lalu", c: "bg-warning/15 text-warning" },
-              { t: "Update jadwal Poskamling minggu ini", time: "Kemarin", c: "bg-accent text-accent-foreground" },
-            ].map((a, i) => (
-              <li key={i} className="flex items-center gap-3">
-                <div className={`h-9 w-9 rounded-xl grid place-items-center ${a.c}`}>
-                  <TrendingUp className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium truncate">{a.t}</div>
-                  <div className="text-[11px] text-muted-foreground">{a.time}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className="flex flex-col items-center justify-center text-center py-8 px-3 rounded-xl border border-dashed border-border/60">
+            <div className="h-12 w-12 rounded-2xl bg-muted grid place-items-center mb-2">
+              <TrendingUp className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="text-sm font-semibold">Belum ada aktivitas tercatat</div>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Aktivitas pengurus akan tampil di sini.</p>
+          </div>
         </div>
 
         <div className="glass-strong rounded-2xl p-5">
           <h3 className="font-bold mb-1">Agenda Mendatang</h3>
-          <p className="text-xs text-muted-foreground mb-4">Jangan sampai terlewat</p>
-          <ul className="space-y-3">
-            {[
-              { d: "28", m: "Jun", t: "Kerja Bakti Lingkungan", w: "06:30 WIB" },
-              { d: "02", m: "Jul", t: "Rapat Bulanan RT", w: "19:30 WIB" },
-              { d: "10", m: "Jul", t: "Posyandu Balita", w: "08:00 WIB" },
-            ].map((a, i) => (
-              <li key={i} className="flex items-center gap-3 p-2 rounded-xl hover:bg-accent/60 transition">
-                <div className="h-12 w-12 rounded-xl gradient-primary text-primary-foreground grid place-items-center shrink-0 shadow-glow">
-                  <div className="text-center leading-none">
-                    <div className="text-base font-extrabold">{a.d}</div>
-                    <div className="text-[9px] uppercase tracking-wider opacity-90">{a.m}</div>
-                  </div>
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold truncate">{a.t}</div>
-                  <div className="text-[11px] text-muted-foreground">{a.w}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <p className="text-xs text-muted-foreground mb-4">Jadwal kegiatan RT</p>
+          <div className="flex flex-col items-center justify-center text-center py-8 px-3 rounded-xl border border-dashed border-border/60">
+            <div className="h-12 w-12 rounded-2xl bg-muted grid place-items-center mb-2">
+              <CalendarX className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="text-sm font-semibold">Belum ada agenda</div>
+            <Link to="/absensi" className="text-[11px] text-primary font-semibold mt-1 hover:underline">Buat Agenda →</Link>
+          </div>
         </div>
       </section>
     </div>

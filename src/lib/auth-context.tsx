@@ -2,9 +2,17 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { loadLS, saveLS, uid, nowISO } from "./storage";
 
 export type Role =
+  | "Super Admin"
   | "Ketua RT"
   | "Sekretaris"
   | "Bendahara"
+  | "Bendahara 1"
+  | "Bendahara 2"
+  | "Humas"
+  | "Keamanan 1"
+  | "Keamanan 2"
+  | "Sie Kematian"
+  | "Sie Umum"
   | "Sie Perlengkapan"
   | "Sie Keamanan"
   | "Sie Sosial"
@@ -15,8 +23,9 @@ export type Role =
   | "Warga";
 
 export const ROLES: Role[] = [
-  "Ketua RT", "Sekretaris", "Bendahara", "Sie Perlengkapan", "Sie Keamanan",
-  "Sie Sosial", "Sie Humas", "Sie Pemuda", "Sie Lingkungan", "Admin", "Warga",
+  "Super Admin", "Ketua RT", "Sekretaris", "Bendahara 1", "Bendahara 2",
+  "Humas", "Keamanan 1", "Keamanan 2", "Sie Perlengkapan", "Sie Kematian",
+  "Sie Umum", "Warga",
 ];
 
 export interface StaffUser {
@@ -44,10 +53,7 @@ const SESSION_KEY = "sirt06_session_v1";
 const AUDIT_KEY = "sirt06_audit_v1";
 
 const DEFAULT_USERS: StaffUser[] = [
-  { id: "u_ketua", nama: "Ketua RT", role: "Ketua RT", pin: "060707", aktif: true, createdAt: nowISO() },
-  { id: "u_sek", nama: "Sekretaris RT", role: "Sekretaris", pin: "111111", aktif: true, createdAt: nowISO() },
-  { id: "u_bend", nama: "Bendahara RT", role: "Bendahara", pin: "222222", aktif: true, createdAt: nowISO() },
-  { id: "u_perl", nama: "Sie Perlengkapan", role: "Sie Perlengkapan", pin: "333333", aktif: true, createdAt: nowISO() },
+  { id: "u_super", nama: "Super Admin", role: "Super Admin", pin: "000000", aktif: true, createdAt: nowISO() },
 ];
 
 interface AuthCtx {

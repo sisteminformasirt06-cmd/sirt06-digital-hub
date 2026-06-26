@@ -2,6 +2,8 @@ import { useRef, useState } from "react";
 import { Music2, Play, Pause, Square, Upload, Volume2, ChevronUp, ChevronDown } from "lucide-react";
 import { useMusic } from "@/lib/music-context";
 import { cn } from "@/lib/utils";
+import { useSettings } from "@/lib/settings-context";
+import { useEffect } from "react";
 
 function fmt(t: number) {
   if (!isFinite(t) || t < 0) return "0:00";
@@ -12,8 +14,16 @@ function fmt(t: number) {
 
 export function FloatingMusicPlayer() {
   const { track, isPlaying, volume, currentTime, duration, loadFile, play, pause, stop, setVolume, seek } = useMusic();
+  const { musik } = useSettings();
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setVolume(musik.volumeAwal);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [musik.volumeAwal]);
+
+  if (!musik.aktif) return null;
 
   return (
     <div className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+1rem)] right-4 z-40 select-none">
