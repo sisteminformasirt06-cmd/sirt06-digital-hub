@@ -5,7 +5,7 @@ import {
   SlidersHorizontal, DatabaseBackup, ShieldCheck, Upload, Plus, Trash2,
   Download, FileSpreadsheet, FileText as FileTextIcon, CheckCircle2,
 } from "lucide-react";
-import { PageHeader, Field, SubmitBtn, LoginRequired } from "./warga";
+import { PageHeader, Field, LoginRequired } from "./warga";
 import { useSettings, type RtIdentity, type PengurusInfo, type KontakRT, type EmergencyKontak } from "@/lib/settings-context";
 import { useAuth, ROLES, type Role, type StaffUser } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme-context";
@@ -561,6 +561,3 @@ function Card({ title, desc, children }: { title: string; desc?: string; childre
     </section>
   );
 }
-
-// Helpers
-function _unused() { return { Upload, SubmitBtn }; }
