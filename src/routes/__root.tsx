@@ -15,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeProvider } from "../lib/theme-context";
 import { MusicProvider } from "../lib/music-context";
 import { AuthProvider } from "../lib/auth-context";
+import { SettingsProvider } from "../lib/settings-context";
 import { AppShell } from "../components/app-shell";
 import { FloatingMusicPlayer } from "../components/music-player";
 import { FloatingEmergencyButton } from "../components/emergency-button";
@@ -136,14 +137,16 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <MusicProvider>
-            <AppShell>
-              <Outlet />
-              <Footer />
-            </AppShell>
-            <FloatingMusicPlayer />
-            <FloatingEmergencyButton />
-          </MusicProvider>
+          <SettingsProvider>
+            <MusicProvider>
+              <AppShell>
+                <Outlet />
+                <Footer />
+              </AppShell>
+              <FloatingMusicPlayer />
+              <FloatingEmergencyButton />
+            </MusicProvider>
+          </SettingsProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
