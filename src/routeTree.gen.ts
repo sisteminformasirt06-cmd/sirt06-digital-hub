@@ -14,7 +14,6 @@ import { Route as WargaRouteImport } from './routes/warga'
 import { Route as UmkmRouteImport } from './routes/umkm'
 import { Route as QrCenterRouteImport } from './routes/qr-center'
 import { Route as PoskamlingRouteImport } from './routes/poskamling'
-import { Route as PengaturanRouteImport } from './routes/pengaturan'
 import { Route as MediaRouteImport } from './routes/media'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as KritikSaranRouteImport } from './routes/kritik-saran'
@@ -48,11 +47,6 @@ const QrCenterRoute = QrCenterRouteImport.update({
 const PoskamlingRoute = PoskamlingRouteImport.update({
   id: '/poskamling',
   path: '/poskamling',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PengaturanRoute = PengaturanRouteImport.update({
-  id: '/pengaturan',
-  path: '/pengaturan',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MediaRoute = MediaRouteImport.update({
@@ -111,7 +105,6 @@ export interface FileRoutesByFullPath {
   '/kritik-saran': typeof KritikSaranRoute
   '/login': typeof LoginRoute
   '/media': typeof MediaRoute
-  '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
   '/umkm': typeof UmkmRoute
@@ -128,7 +121,6 @@ export interface FileRoutesByTo {
   '/kritik-saran': typeof KritikSaranRoute
   '/login': typeof LoginRoute
   '/media': typeof MediaRoute
-  '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
   '/umkm': typeof UmkmRoute
@@ -146,7 +138,6 @@ export interface FileRoutesById {
   '/kritik-saran': typeof KritikSaranRoute
   '/login': typeof LoginRoute
   '/media': typeof MediaRoute
-  '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
   '/umkm': typeof UmkmRoute
@@ -165,7 +156,6 @@ export interface FileRouteTypes {
     | '/kritik-saran'
     | '/login'
     | '/media'
-    | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
     | '/umkm'
@@ -182,7 +172,6 @@ export interface FileRouteTypes {
     | '/kritik-saran'
     | '/login'
     | '/media'
-    | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
     | '/umkm'
@@ -199,7 +188,6 @@ export interface FileRouteTypes {
     | '/kritik-saran'
     | '/login'
     | '/media'
-    | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
     | '/umkm'
@@ -217,7 +205,6 @@ export interface RootRouteChildren {
   KritikSaranRoute: typeof KritikSaranRoute
   LoginRoute: typeof LoginRoute
   MediaRoute: typeof MediaRoute
-  PengaturanRoute: typeof PengaturanRoute
   PoskamlingRoute: typeof PoskamlingRoute
   QrCenterRoute: typeof QrCenterRoute
   UmkmRoute: typeof UmkmRoute
@@ -260,13 +247,6 @@ declare module '@tanstack/react-router' {
       path: '/poskamling'
       fullPath: '/poskamling'
       preLoaderRoute: typeof PoskamlingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pengaturan': {
-      id: '/pengaturan'
-      path: '/pengaturan'
-      fullPath: '/pengaturan'
-      preLoaderRoute: typeof PengaturanRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/media': {
@@ -345,7 +325,6 @@ const rootRouteChildren: RootRouteChildren = {
   KritikSaranRoute: KritikSaranRoute,
   LoginRoute: LoginRoute,
   MediaRoute: MediaRoute,
-  PengaturanRoute: PengaturanRoute,
   PoskamlingRoute: PoskamlingRoute,
   QrCenterRoute: QrCenterRoute,
   UmkmRoute: UmkmRoute,
