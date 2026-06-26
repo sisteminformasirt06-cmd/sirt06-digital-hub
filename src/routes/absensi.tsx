@@ -143,7 +143,7 @@ function AbsensiPage() {
         />
       )}
       {tab === "scan" && <ScanPanel onCheckIn={checkIn} kegiatan={sortedKegiatan} />}
-      {tab === "rekap" && <RekapPanel kegiatan={sortedKegiatan} hadir={hadir} totalWarga={WARGA_DUMMY.length} />}
+      {tab === "rekap" && <RekapPanel kegiatan={sortedKegiatan} hadir={hadir} totalWarga={getWargaNames().length} />}
       {tab === "riwayat" && <RiwayatPanel kegiatan={kegiatan} hadir={hadir} />}
       {tab === "statistik" && <StatistikPanel kegiatan={kegiatan} hadir={hadir} />}
 
@@ -436,7 +436,7 @@ function ScanPanel({ onCheckIn, kegiatan }: { onCheckIn: (token: string, nama: s
   useEffect(() => {
     if (!nama.trim()) { setSugg([]); return; }
     const q = nama.toLowerCase();
-    setSugg(WARGA_DUMMY.filter((n) => n.toLowerCase().includes(q) && n.toLowerCase() !== q).slice(0, 5));
+    setSugg(getWargaNames().filter((n) => n.toLowerCase().includes(q) && n.toLowerCase() !== q).slice(0, 5));
   }, [nama]);
 
   useEffect(() => {
