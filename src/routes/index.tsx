@@ -356,58 +356,33 @@ function Dashboard() {
         </div>
       </section>
 
-      {/* Quick actions / cards */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="glass-strong rounded-2xl p-5 lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold">Aktivitas Terbaru</h3>
-            <button className="text-xs text-primary font-semibold flex items-center gap-1 hover:underline">
-              Lihat semua <ArrowUpRight className="h-3 w-3" />
-            </button>
+            <Link to="/pengaturan" className="text-xs text-primary font-semibold flex items-center gap-1 hover:underline">
+              Audit Log <ArrowUpRight className="h-3 w-3" />
+            </Link>
           </div>
-          <ul className="space-y-3">
-            {[
-              { t: "Iuran kas diterima dari Bp. Ahmad", time: "5 menit lalu", c: "bg-success/15 text-success" },
-              { t: "Pengajuan surat domisili oleh Ibu Sari", time: "1 jam lalu", c: "bg-primary/15 text-primary" },
-              { t: "Agenda rapat warga ditambahkan", time: "3 jam lalu", c: "bg-warning/15 text-warning" },
-              { t: "Update jadwal Poskamling minggu ini", time: "Kemarin", c: "bg-accent text-accent-foreground" },
-            ].map((a, i) => (
-              <li key={i} className="flex items-center gap-3">
-                <div className={`h-9 w-9 rounded-xl grid place-items-center ${a.c}`}>
-                  <TrendingUp className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium truncate">{a.t}</div>
-                  <div className="text-[11px] text-muted-foreground">{a.time}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className="flex flex-col items-center justify-center text-center py-8 px-3 rounded-xl border border-dashed border-border/60">
+            <div className="h-12 w-12 rounded-2xl bg-muted grid place-items-center mb-2">
+              <TrendingUp className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="text-sm font-semibold">Belum ada aktivitas tercatat</div>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Aktivitas pengurus akan tampil di sini.</p>
+          </div>
         </div>
 
         <div className="glass-strong rounded-2xl p-5">
           <h3 className="font-bold mb-1">Agenda Mendatang</h3>
-          <p className="text-xs text-muted-foreground mb-4">Jangan sampai terlewat</p>
-          <ul className="space-y-3">
-            {[
-              { d: "28", m: "Jun", t: "Kerja Bakti Lingkungan", w: "06:30 WIB" },
-              { d: "02", m: "Jul", t: "Rapat Bulanan RT", w: "19:30 WIB" },
-              { d: "10", m: "Jul", t: "Posyandu Balita", w: "08:00 WIB" },
-            ].map((a, i) => (
-              <li key={i} className="flex items-center gap-3 p-2 rounded-xl hover:bg-accent/60 transition">
-                <div className="h-12 w-12 rounded-xl gradient-primary text-primary-foreground grid place-items-center shrink-0 shadow-glow">
-                  <div className="text-center leading-none">
-                    <div className="text-base font-extrabold">{a.d}</div>
-                    <div className="text-[9px] uppercase tracking-wider opacity-90">{a.m}</div>
-                  </div>
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold truncate">{a.t}</div>
-                  <div className="text-[11px] text-muted-foreground">{a.w}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <p className="text-xs text-muted-foreground mb-4">Jadwal kegiatan RT</p>
+          <div className="flex flex-col items-center justify-center text-center py-8 px-3 rounded-xl border border-dashed border-border/60">
+            <div className="h-12 w-12 rounded-2xl bg-muted grid place-items-center mb-2">
+              <CalendarX className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="text-sm font-semibold">Belum ada agenda</div>
+            <Link to="/absensi" className="text-[11px] text-primary font-semibold mt-1 hover:underline">Buat Agenda →</Link>
+          </div>
         </div>
       </section>
     </div>
