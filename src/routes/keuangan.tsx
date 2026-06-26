@@ -4,6 +4,7 @@ import { Wallet, Plus, ArrowDownCircle, ArrowUpCircle, Trash2, BarChart3 } from 
 import { useLS, uid, nowISO, rupiah, tanggal } from "@/lib/storage";
 import { useAuth } from "@/lib/auth-context";
 import { PageHeader, DataTable, Modal, Field, SubmitBtn, LoginRequired } from "./warga";
+import { useSettings } from "@/lib/settings-context";
 
 export const Route = createFileRoute("/keuangan")({
   head: () => ({
@@ -31,6 +32,7 @@ interface Transaksi {
 
 function KeuanganPage() {
   const { user, logAction } = useAuth();
+  const { kasSaldoAwal } = useSettings();
   const [trx, setTrx] = useLS<Transaksi[]>("sirt06_trx_v1", []);
   const [activeKas, setActiveKas] = useState<KasJenis>("Kas RT");
   const [showAdd, setShowAdd] = useState(false);
@@ -39,10 +41,10 @@ function KeuanganPage() {
 
   const saldoPerKas = useMemo(() => {
     const map: Record<string, number> = {};
-    KAS_LIST.forEach((k) => (map[k] = 0));
+    KAS_LIST.forEach((k) => (map[k] = Number(kasSaldoAwal[k]) || 0));
     trx.forEach((t) => { map[t.kas] += t.tipe === "Masuk" ? t.jumlah : -t.jumlah; });
     return map;
-  }, [trx]);
+  }, [trx, kasSaldoAwal]);
 
   const trxKas = useMemo(() => trx.filter((t) => t.kas === activeKas), [trx, activeKas]);
 
