@@ -39,56 +39,7 @@ interface Laporan {
 const KATEGORI: Kategori[] = ["Keamanan", "Kebersihan", "Infrastruktur", "Sosial", "Lainnya"];
 const STATUS: Status[] = ["Diterima", "Diproses", "Selesai"];
 
-const DUMMY: Laporan[] = [
-  {
-    id: "lap_seed_1", kode: "KS-2026-001",
-    nama: "Pak Suparman", anonim: false, kategori: "Infrastruktur",
-    judul: "Lampu jalan depan Gg. Mawar mati",
-    isi: "Sudah 3 hari lampu PJU di Gg. Mawar RT 06 mati total, jalan jadi gelap dan rawan. Mohon segera diperbaiki.",
-    status: "Diproses",
-    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-    riwayat: [
-      { waktu: new Date(Date.now() - 86400000 * 3).toISOString(), status: "Diterima", oleh: "Sistem" },
-      { waktu: new Date(Date.now() - 86400000 * 2).toISOString(), status: "Diproses", oleh: "Sie Perlengkapan", catatan: "Sudah dilaporkan ke kelurahan." },
-    ],
-  },
-  {
-    id: "lap_seed_2", kode: "KS-2026-002",
-    nama: "Anonim", anonim: true, kategori: "Kebersihan",
-    judul: "Tumpukan sampah di pojok lapangan",
-    isi: "Sampah menumpuk di sudut lapangan voli sejak minggu lalu, bau menyengat saat sore. Tolong diatur jadwal angkut tambahan.",
-    status: "Selesai",
-    createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
-    riwayat: [
-      { waktu: new Date(Date.now() - 86400000 * 7).toISOString(), status: "Diterima", oleh: "Sistem" },
-      { waktu: new Date(Date.now() - 86400000 * 6).toISOString(), status: "Diproses", oleh: "Sie Lingkungan" },
-      { waktu: new Date(Date.now() - 86400000 * 4).toISOString(), status: "Selesai", oleh: "Sie Lingkungan", catatan: "Sampah sudah diangkut, jadwal tambahan setiap Jumat." },
-    ],
-  },
-  {
-    id: "lap_seed_3", kode: "KS-2026-003",
-    nama: "Ibu Wati", anonim: false, kategori: "Keamanan",
-    judul: "Motor asing parkir tengah malam di Gg. Melati",
-    isi: "Beberapa malam terakhir ada motor tidak dikenal parkir lama di depan rumah kosong Gg. Melati. Mohon ditingkatkan patroli poskamling.",
-    status: "Diterima",
-    createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
-    riwayat: [
-      { waktu: new Date(Date.now() - 86400000 * 1).toISOString(), status: "Diterima", oleh: "Sistem" },
-    ],
-  },
-  {
-    id: "lap_seed_4", kode: "KS-2026-004",
-    nama: "Mas Bagus", anonim: false, kategori: "Sosial",
-    judul: "Usulan kerja bakti bulanan rutin",
-    isi: "Mengusulkan kerja bakti rutin tiap Minggu pertama agar lingkungan tetap rapi dan warga makin akrab.",
-    status: "Diproses",
-    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-    riwayat: [
-      { waktu: new Date(Date.now() - 86400000 * 2).toISOString(), status: "Diterima", oleh: "Sistem" },
-      { waktu: new Date(Date.now() - 86400000 * 1).toISOString(), status: "Diproses", oleh: "Ketua RT", catatan: "Akan dibahas pada rapat RT mendatang." },
-    ],
-  },
-];
+const DUMMY: Laporan[] = [];
 
 const statusColor: Record<Status, string> = {
   Diterima: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30",
