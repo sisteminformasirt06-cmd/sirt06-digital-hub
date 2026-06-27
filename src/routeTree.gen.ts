@@ -16,6 +16,7 @@ import { Route as QrCenterRouteImport } from './routes/qr-center'
 import { Route as PoskamlingRouteImport } from './routes/poskamling'
 import { Route as PengaturanRouteImport } from './routes/pengaturan'
 import { Route as MediaRouteImport } from './routes/media'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as KritikSaranRouteImport } from './routes/kritik-saran'
 import { Route as KeuanganRouteImport } from './routes/keuangan'
 import { Route as InventarisRouteImport } from './routes/inventaris'
@@ -57,6 +58,11 @@ const PengaturanRoute = PengaturanRouteImport.update({
 const MediaRoute = MediaRouteImport.update({
   id: '/media',
   path: '/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KritikSaranRoute = KritikSaranRouteImport.update({
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/inventaris': typeof InventarisRoute
   '/keuangan': typeof KeuanganRoute
   '/kritik-saran': typeof KritikSaranRoute
+  '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/inventaris': typeof InventarisRoute
   '/keuangan': typeof KeuanganRoute
   '/kritik-saran': typeof KritikSaranRoute
+  '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/inventaris': typeof InventarisRoute
   '/keuangan': typeof KeuanganRoute
   '/kritik-saran': typeof KritikSaranRoute
+  '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/inventaris'
     | '/keuangan'
     | '/kritik-saran'
+    | '/login'
     | '/media'
     | '/pengaturan'
     | '/poskamling'
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/inventaris'
     | '/keuangan'
     | '/kritik-saran'
+    | '/login'
     | '/media'
     | '/pengaturan'
     | '/poskamling'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/inventaris'
     | '/keuangan'
     | '/kritik-saran'
+    | '/login'
     | '/media'
     | '/pengaturan'
     | '/poskamling'
@@ -203,6 +215,7 @@ export interface RootRouteChildren {
   InventarisRoute: typeof InventarisRoute
   KeuanganRoute: typeof KeuanganRoute
   KritikSaranRoute: typeof KritikSaranRoute
+  LoginRoute: typeof LoginRoute
   MediaRoute: typeof MediaRoute
   PengaturanRoute: typeof PengaturanRoute
   PoskamlingRoute: typeof PoskamlingRoute
@@ -261,6 +274,13 @@ declare module '@tanstack/react-router' {
       path: '/media'
       fullPath: '/media'
       preLoaderRoute: typeof MediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/kritik-saran': {
@@ -323,6 +343,7 @@ const rootRouteChildren: RootRouteChildren = {
   InventarisRoute: InventarisRoute,
   KeuanganRoute: KeuanganRoute,
   KritikSaranRoute: KritikSaranRoute,
+  LoginRoute: LoginRoute,
   MediaRoute: MediaRoute,
   PengaturanRoute: PengaturanRoute,
   PoskamlingRoute: PoskamlingRoute,
