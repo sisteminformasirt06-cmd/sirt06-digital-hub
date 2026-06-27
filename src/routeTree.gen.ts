@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhatsappRouteImport } from './routes/whatsapp'
 import { Route as WargaRouteImport } from './routes/warga'
 import { Route as UmkmRouteImport } from './routes/umkm'
+import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as QrCenterRouteImport } from './routes/qr-center'
 import { Route as PoskamlingRouteImport } from './routes/poskamling'
 import { Route as PengaturanRouteImport } from './routes/pengaturan'
@@ -39,6 +40,11 @@ const WargaRoute = WargaRouteImport.update({
 const UmkmRoute = UmkmRouteImport.update({
   id: '/umkm',
   path: '/umkm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuperAdminRoute = SuperAdminRouteImport.update({
+  id: '/super-admin',
+  path: '/super-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QrCenterRoute = QrCenterRouteImport.update({
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
+  '/super-admin': typeof SuperAdminRoute
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
   '/whatsapp': typeof WhatsappRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
+  '/super-admin': typeof SuperAdminRoute
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
   '/whatsapp': typeof WhatsappRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
+  '/super-admin': typeof SuperAdminRoute
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
   '/whatsapp': typeof WhatsappRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
+    | '/super-admin'
     | '/umkm'
     | '/warga'
     | '/whatsapp'
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
+    | '/super-admin'
     | '/umkm'
     | '/warga'
     | '/whatsapp'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
+    | '/super-admin'
     | '/umkm'
     | '/warga'
     | '/whatsapp'
@@ -233,6 +245,7 @@ export interface RootRouteChildren {
   PengaturanRoute: typeof PengaturanRoute
   PoskamlingRoute: typeof PoskamlingRoute
   QrCenterRoute: typeof QrCenterRoute
+  SuperAdminRoute: typeof SuperAdminRoute
   UmkmRoute: typeof UmkmRoute
   WargaRoute: typeof WargaRoute
   WhatsappRoute: typeof WhatsappRoute
@@ -259,6 +272,13 @@ declare module '@tanstack/react-router' {
       path: '/umkm'
       fullPath: '/umkm'
       preLoaderRoute: typeof UmkmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/super-admin': {
+      id: '/super-admin'
+      path: '/super-admin'
+      fullPath: '/super-admin'
+      preLoaderRoute: typeof SuperAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/qr-center': {
@@ -369,6 +389,7 @@ const rootRouteChildren: RootRouteChildren = {
   PengaturanRoute: PengaturanRoute,
   PoskamlingRoute: PoskamlingRoute,
   QrCenterRoute: QrCenterRoute,
+  SuperAdminRoute: SuperAdminRoute,
   UmkmRoute: UmkmRoute,
   WargaRoute: WargaRoute,
   WhatsappRoute: WhatsappRoute,
