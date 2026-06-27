@@ -14,16 +14,185 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      audit_log: {
+        Row: {
+          aksi: string
+          detail: string | null
+          id: string
+          ip: string | null
+          modul: string
+          nama: string
+          pengurus_id: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
+          waktu: string
+        }
+        Insert: {
+          aksi: string
+          detail?: string | null
+          id?: string
+          ip?: string | null
+          modul: string
+          nama: string
+          pengurus_id?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
+          waktu?: string
+        }
+        Update: {
+          aksi?: string
+          detail?: string | null
+          id?: string
+          ip?: string | null
+          modul?: string
+          nama?: string
+          pengurus_id?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
+          waktu?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_pengurus_id_fkey"
+            columns: ["pengurus_id"]
+            isOneToOne: false
+            referencedRelation: "pengurus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pengurus: {
+        Row: {
+          aktif: boolean
+          created_at: string
+          created_by: string | null
+          gagal_login: number
+          harus_ganti_pin: boolean
+          id: string
+          jabatan: Database["public"]["Enums"]["app_role"]
+          last_login_at: string | null
+          locked_until: string | null
+          nama: string
+          pin_hash: string
+        }
+        Insert: {
+          aktif?: boolean
+          created_at?: string
+          created_by?: string | null
+          gagal_login?: number
+          harus_ganti_pin?: boolean
+          id?: string
+          jabatan: Database["public"]["Enums"]["app_role"]
+          last_login_at?: string | null
+          locked_until?: string | null
+          nama: string
+          pin_hash: string
+        }
+        Update: {
+          aktif?: boolean
+          created_at?: string
+          created_by?: string | null
+          gagal_login?: number
+          harus_ganti_pin?: boolean
+          id?: string
+          jabatan?: Database["public"]["Enums"]["app_role"]
+          last_login_at?: string | null
+          locked_until?: string | null
+          nama?: string
+          pin_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pengurus_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "pengurus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pengurus_session: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          pengurus_id: string
+          token_hash: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          pengurus_id: string
+          token_hash: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          pengurus_id?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pengurus_session_pengurus_id_fkey"
+            columns: ["pengurus_id"]
+            isOneToOne: false
+            referencedRelation: "pengurus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          pengurus_id: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          id?: string
+          pengurus_id: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          id?: string
+          pengurus_id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_pengurus_id_fkey"
+            columns: ["pengurus_id"]
+            isOneToOne: false
+            referencedRelation: "pengurus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _pengurus_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role:
+        | "super_admin"
+        | "ketua_rt"
+        | "sekretaris"
+        | "bendahara_1"
+        | "bendahara_2"
+        | "humas"
+        | "keamanan_1"
+        | "keamanan_2"
+        | "sie_perlengkapan"
+        | "sie_kematian"
+        | "sie_umum"
+        | "warga"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +319,21 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: [
+        "super_admin",
+        "ketua_rt",
+        "sekretaris",
+        "bendahara_1",
+        "bendahara_2",
+        "humas",
+        "keamanan_1",
+        "keamanan_2",
+        "sie_perlengkapan",
+        "sie_kematian",
+        "sie_umum",
+        "warga",
+      ],
+    },
   },
 } as const
