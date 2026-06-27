@@ -59,7 +59,7 @@ function LoginPage() {
           {user.harusGantiPin && (
             <button
               onClick={() => navigate({ to: "/ganti-pin" })}
-              className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-warning/90 text-warning-foreground py-3 font-semibold"
+              className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-warning/90 text-white py-3 font-semibold"
             >
               <KeyRound className="h-4 w-4" /> Ganti PIN Sekarang
             </button>
