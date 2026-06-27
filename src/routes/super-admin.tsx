@@ -71,7 +71,7 @@ function SuperAdminPage() {
         </div>
       </header>
 
-      <nav className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-thin">
+      <nav className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
