@@ -178,6 +178,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      pengurus_attempt_login: { Args: { _pin: string }; Returns: Json }
+      pengurus_change_pin: {
+        Args: { _id: string; _new: string; _old: string }
+        Returns: boolean
+      }
+      pengurus_reset_pin: { Args: { _id: string }; Returns: undefined }
+      pengurus_set_pin: {
+        Args: { _id: string; _pin: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role:
