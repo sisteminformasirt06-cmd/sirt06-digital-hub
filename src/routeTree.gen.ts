@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhatsappRouteImport } from './routes/whatsapp'
 import { Route as WargaRouteImport } from './routes/warga'
 import { Route as UmkmRouteImport } from './routes/umkm'
+import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as QrCenterRouteImport } from './routes/qr-center'
 import { Route as PoskamlingRouteImport } from './routes/poskamling'
 import { Route as PengaturanRouteImport } from './routes/pengaturan'
@@ -20,6 +21,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as KritikSaranRouteImport } from './routes/kritik-saran'
 import { Route as KeuanganRouteImport } from './routes/keuangan'
 import { Route as InventarisRouteImport } from './routes/inventaris'
+import { Route as GantiPinRouteImport } from './routes/ganti-pin'
 import { Route as EmergencyRouteImport } from './routes/emergency'
 import { Route as AdministrasiRouteImport } from './routes/administrasi'
 import { Route as AbsensiRouteImport } from './routes/absensi'
@@ -38,6 +40,11 @@ const WargaRoute = WargaRouteImport.update({
 const UmkmRoute = UmkmRouteImport.update({
   id: '/umkm',
   path: '/umkm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuperAdminRoute = SuperAdminRouteImport.update({
+  id: '/super-admin',
+  path: '/super-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QrCenterRoute = QrCenterRouteImport.update({
@@ -80,6 +87,11 @@ const InventarisRoute = InventarisRouteImport.update({
   path: '/inventaris',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GantiPinRoute = GantiPinRouteImport.update({
+  id: '/ganti-pin',
+  path: '/ganti-pin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EmergencyRoute = EmergencyRouteImport.update({
   id: '/emergency',
   path: '/emergency',
@@ -106,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/absensi': typeof AbsensiRoute
   '/administrasi': typeof AdministrasiRoute
   '/emergency': typeof EmergencyRoute
+  '/ganti-pin': typeof GantiPinRoute
   '/inventaris': typeof InventarisRoute
   '/keuangan': typeof KeuanganRoute
   '/kritik-saran': typeof KritikSaranRoute
@@ -114,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
+  '/super-admin': typeof SuperAdminRoute
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
   '/whatsapp': typeof WhatsappRoute
@@ -123,6 +137,7 @@ export interface FileRoutesByTo {
   '/absensi': typeof AbsensiRoute
   '/administrasi': typeof AdministrasiRoute
   '/emergency': typeof EmergencyRoute
+  '/ganti-pin': typeof GantiPinRoute
   '/inventaris': typeof InventarisRoute
   '/keuangan': typeof KeuanganRoute
   '/kritik-saran': typeof KritikSaranRoute
@@ -131,6 +146,7 @@ export interface FileRoutesByTo {
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
+  '/super-admin': typeof SuperAdminRoute
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
   '/whatsapp': typeof WhatsappRoute
@@ -141,6 +157,7 @@ export interface FileRoutesById {
   '/absensi': typeof AbsensiRoute
   '/administrasi': typeof AdministrasiRoute
   '/emergency': typeof EmergencyRoute
+  '/ganti-pin': typeof GantiPinRoute
   '/inventaris': typeof InventarisRoute
   '/keuangan': typeof KeuanganRoute
   '/kritik-saran': typeof KritikSaranRoute
@@ -149,6 +166,7 @@ export interface FileRoutesById {
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
+  '/super-admin': typeof SuperAdminRoute
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
   '/whatsapp': typeof WhatsappRoute
@@ -160,6 +178,7 @@ export interface FileRouteTypes {
     | '/absensi'
     | '/administrasi'
     | '/emergency'
+    | '/ganti-pin'
     | '/inventaris'
     | '/keuangan'
     | '/kritik-saran'
@@ -168,6 +187,7 @@ export interface FileRouteTypes {
     | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
+    | '/super-admin'
     | '/umkm'
     | '/warga'
     | '/whatsapp'
@@ -177,6 +197,7 @@ export interface FileRouteTypes {
     | '/absensi'
     | '/administrasi'
     | '/emergency'
+    | '/ganti-pin'
     | '/inventaris'
     | '/keuangan'
     | '/kritik-saran'
@@ -185,6 +206,7 @@ export interface FileRouteTypes {
     | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
+    | '/super-admin'
     | '/umkm'
     | '/warga'
     | '/whatsapp'
@@ -194,6 +216,7 @@ export interface FileRouteTypes {
     | '/absensi'
     | '/administrasi'
     | '/emergency'
+    | '/ganti-pin'
     | '/inventaris'
     | '/keuangan'
     | '/kritik-saran'
@@ -202,6 +225,7 @@ export interface FileRouteTypes {
     | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
+    | '/super-admin'
     | '/umkm'
     | '/warga'
     | '/whatsapp'
@@ -212,6 +236,7 @@ export interface RootRouteChildren {
   AbsensiRoute: typeof AbsensiRoute
   AdministrasiRoute: typeof AdministrasiRoute
   EmergencyRoute: typeof EmergencyRoute
+  GantiPinRoute: typeof GantiPinRoute
   InventarisRoute: typeof InventarisRoute
   KeuanganRoute: typeof KeuanganRoute
   KritikSaranRoute: typeof KritikSaranRoute
@@ -220,6 +245,7 @@ export interface RootRouteChildren {
   PengaturanRoute: typeof PengaturanRoute
   PoskamlingRoute: typeof PoskamlingRoute
   QrCenterRoute: typeof QrCenterRoute
+  SuperAdminRoute: typeof SuperAdminRoute
   UmkmRoute: typeof UmkmRoute
   WargaRoute: typeof WargaRoute
   WhatsappRoute: typeof WhatsappRoute
@@ -246,6 +272,13 @@ declare module '@tanstack/react-router' {
       path: '/umkm'
       fullPath: '/umkm'
       preLoaderRoute: typeof UmkmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/super-admin': {
+      id: '/super-admin'
+      path: '/super-admin'
+      fullPath: '/super-admin'
+      preLoaderRoute: typeof SuperAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/qr-center': {
@@ -304,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InventarisRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ganti-pin': {
+      id: '/ganti-pin'
+      path: '/ganti-pin'
+      fullPath: '/ganti-pin'
+      preLoaderRoute: typeof GantiPinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/emergency': {
       id: '/emergency'
       path: '/emergency'
@@ -340,6 +380,7 @@ const rootRouteChildren: RootRouteChildren = {
   AbsensiRoute: AbsensiRoute,
   AdministrasiRoute: AdministrasiRoute,
   EmergencyRoute: EmergencyRoute,
+  GantiPinRoute: GantiPinRoute,
   InventarisRoute: InventarisRoute,
   KeuanganRoute: KeuanganRoute,
   KritikSaranRoute: KritikSaranRoute,
@@ -348,6 +389,7 @@ const rootRouteChildren: RootRouteChildren = {
   PengaturanRoute: PengaturanRoute,
   PoskamlingRoute: PoskamlingRoute,
   QrCenterRoute: QrCenterRoute,
+  SuperAdminRoute: SuperAdminRoute,
   UmkmRoute: UmkmRoute,
   WargaRoute: WargaRoute,
   WhatsappRoute: WhatsappRoute,
@@ -355,13 +397,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

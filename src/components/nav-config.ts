@@ -1,10 +1,18 @@
 import {
   LayoutDashboard, Users, FileText, Wallet, Boxes, ShieldCheck,
   ClipboardCheck, QrCode, Store, MessageSquareWarning, Siren,
-  Newspaper, MessageCircle, Settings,
+  Newspaper, MessageCircle, Settings, Crown,
 } from "lucide-react";
+import type { Role } from "@/lib/auth-context";
 
-export const navItems = [
+export interface NavItem {
+  to: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  roles?: Role[];
+}
+
+export const navItems: readonly NavItem[] = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/warga", label: "Data Warga", icon: Users },
   { to: "/administrasi", label: "Administrasi", icon: FileText },
@@ -19,4 +27,5 @@ export const navItems = [
   { to: "/media", label: "Pengumuman", icon: Newspaper },
   { to: "/whatsapp", label: "WhatsApp Center", icon: MessageCircle },
   { to: "/pengaturan", label: "Pengaturan", icon: Settings },
-] as const;
+  { to: "/super-admin", label: "Super Admin", icon: Crown, roles: ["Super Admin"] },
+];

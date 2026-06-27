@@ -12,6 +12,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { theme, toggle } = useTheme();
   const { user } = useAuth();
+  const role = user?.role;
 
   useEffect(() => setOpenMobile(false), [pathname]);
 
@@ -19,7 +20,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="app-bg min-h-screen flex w-full text-foreground">
       {/* Sidebar - desktop */}
       <aside className="hidden lg:flex flex-col w-64 shrink-0 border-r border-sidebar-border bg-sidebar/80 backdrop-blur-xl sticky top-0 h-screen">
-        <SidebarInner pathname={pathname} />
+        <SidebarInner pathname={pathname} role={role} />
       </aside>
 
       {/* Mobile drawer */}
@@ -27,7 +28,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setOpenMobile(false)} />
           <aside className="absolute left-0 top-0 bottom-0 w-72 bg-sidebar border-r border-sidebar-border flex flex-col">
-            <SidebarInner pathname={pathname} />
+            <SidebarInner pathname={pathname} role={role} />
           </aside>
         </div>
       )}
@@ -94,7 +95,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 
-function SidebarInner({ pathname }: { pathname: string }) {
+function SidebarInner({ pathname, role }: { pathname: string; role?: string }) {
+  const items = navItems.filter((it) => !it.roles || (role && it.roles.includes(role as never)));
   return (
     <>
       <div className="p-5 border-b border-sidebar-border">
@@ -107,7 +109,7 @@ function SidebarInner({ pathname }: { pathname: string }) {
         </div>
       </div>
       <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
-        {navItems.map((item) => {
+        {items.map((item) => {
           const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
           const Icon = item.icon;
           return (

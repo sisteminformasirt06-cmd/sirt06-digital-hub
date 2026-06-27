@@ -513,7 +513,7 @@ function KeamananSection({ isSuper }: { isSuper: boolean }) {
             <div key={u.id} className="glass rounded-xl p-2.5 grid grid-cols-[1fr_auto_auto_auto] gap-2 items-center">
               <div className="min-w-0">
                 <div className="text-sm font-semibold truncate">{u.nama}</div>
-                <div className="text-[10px] text-muted-foreground">{u.role} • PIN •••{u.pin.slice(-2)}</div>
+                <div className="text-[10px] text-muted-foreground">{u.role}{u.harusGantiPin ? " • wajib ganti PIN" : ""}</div>
               </div>
               <select
                 className="form-inp text-xs py-1"
