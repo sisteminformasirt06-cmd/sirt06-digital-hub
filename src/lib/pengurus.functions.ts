@@ -63,7 +63,7 @@ export const updatePengurus = createServerFn({ method: "POST" })
     const { requireSuperAdmin, logAudit } = await import("./auth-session.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const me = await requireSuperAdmin();
-    const patch: Record<string, unknown> = {};
+    const patch: { nama?: string; jabatan?: Jabatan; aktif?: boolean } = {};
     if (data.nama !== undefined) patch.nama = data.nama;
     if (data.jabatan !== undefined) patch.jabatan = data.jabatan;
     if (data.aktif !== undefined) patch.aktif = data.aktif;
