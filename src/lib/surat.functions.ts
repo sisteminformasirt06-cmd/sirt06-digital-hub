@@ -78,7 +78,14 @@ export const updateSuratStatus = createServerFn({ method: "POST" })
     const { jabatanToLabel } = await import("./role-map");
     const me = await requirePengurus();
 
-    const patch: Record<string, unknown> = { status: data.status };
+    const patch: {
+      status: typeof data.status;
+      alasan_tolak?: string | null;
+      approved_by?: string | null;
+      approved_at?: string | null;
+      approved_nama?: string | null;
+      approved_jabatan?: string | null;
+    } = { status: data.status };
     if (data.status === "Ditolak") {
       patch.alasan_tolak = data.alasan_tolak || null;
       patch.approved_by = null;
