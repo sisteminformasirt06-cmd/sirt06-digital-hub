@@ -140,6 +140,84 @@ export type Database = {
           },
         ]
       }
+      surat_pengajuan: {
+        Row: {
+          alasan_tolak: string | null
+          approved_at: string | null
+          approved_by: string | null
+          approved_jabatan: string | null
+          approved_nama: string | null
+          catatan: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          jenis: string
+          keperluan: string
+          nomor_surat: string
+          pemohon_alamat: string | null
+          pemohon_nama: string
+          pemohon_nik: string | null
+          pemohon_telp: string | null
+          status: Database["public"]["Enums"]["surat_status"]
+          updated_at: string
+        }
+        Insert: {
+          alasan_tolak?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_jabatan?: string | null
+          approved_nama?: string | null
+          catatan?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          jenis: string
+          keperluan: string
+          nomor_surat: string
+          pemohon_alamat?: string | null
+          pemohon_nama: string
+          pemohon_nik?: string | null
+          pemohon_telp?: string | null
+          status?: Database["public"]["Enums"]["surat_status"]
+          updated_at?: string
+        }
+        Update: {
+          alasan_tolak?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          approved_jabatan?: string | null
+          approved_nama?: string | null
+          catatan?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          jenis?: string
+          keperluan?: string
+          nomor_surat?: string
+          pemohon_alamat?: string | null
+          pemohon_nama?: string
+          pemohon_nik?: string | null
+          pemohon_telp?: string | null
+          status?: Database["public"]["Enums"]["surat_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "surat_pengajuan_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "pengurus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "surat_pengajuan_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "pengurus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -178,6 +256,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      next_surat_nomor: { Args: { _jenis_kode: string }; Returns: string }
       pengurus_attempt_login: { Args: { _pin: string }; Returns: Json }
       pengurus_change_pin: {
         Args: { _id: string; _new: string; _old: string }
@@ -203,6 +282,7 @@ export type Database = {
         | "sie_kematian"
         | "sie_umum"
         | "warga"
+      surat_status: "Menunggu" | "Diproses" | "Disetujui" | "Ditolak"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -344,6 +424,7 @@ export const Constants = {
         "sie_umum",
         "warga",
       ],
+      surat_status: ["Menunggu", "Diproses", "Disetujui", "Ditolak"],
     },
   },
 } as const
