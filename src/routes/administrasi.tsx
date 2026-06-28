@@ -87,7 +87,11 @@ function AdministrasiPage() {
     });
   }, [surat, search, statusFilter]);
 
-  async function handleCreate(payload: Parameters<typeof fnCreate>[0]["data"]) {
+  async function handleCreate(payload: {
+    jenis: string; jenisKode: string; pemohon_nama: string;
+    pemohon_nik?: string; pemohon_alamat?: string; pemohon_telp?: string;
+    keperluan: string; catatan?: string;
+  }) {
     try {
       await fnCreate({ data: payload });
       await qc.invalidateQueries({ queryKey: ["surat"] });
