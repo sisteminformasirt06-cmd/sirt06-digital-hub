@@ -394,6 +394,44 @@ function SuratForm({
   );
 }
 
+function SuratDetail({ item, onClose, onPrint }: { item: Surat; onClose: () => void; onPrint: () => void }) {
+  const row = (label: string, value: React.ReactNode) => (
+    <div className="grid grid-cols-3 gap-2 text-xs py-1.5 border-b border-border/60 last:border-0">
+      <div className="text-muted-foreground">{label}</div>
+      <div className="col-span-2 font-medium break-words">{value || "—"}</div>
+    </div>
+  );
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-end sm:place-items-center p-2 sm:p-4">
+      <div className="w-full max-w-lg glass-strong rounded-3xl p-4 space-y-3 max-h-[92vh] overflow-y-auto">
+        <div className="flex items-center justify-between">
+          <div className="text-base font-bold">Detail Surat</div>
+          <button onClick={onClose} className="p-2 rounded-xl glass"><X className="h-4 w-4" /></button>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-muted">{item.nomor_surat}</span>
+          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLES[item.status]}`}>{item.status}</span>
+        </div>
+        <div>
+          {row("Jenis", item.jenis)}
+          {row("Tanggal", new Date(item.created_at).toLocaleString("id-ID", { dateStyle: "long", timeStyle: "short" }))}
+          {row("Nama", item.pemohon_nama)}
+          {row("NIK", item.pemohon_nik)}
+          {row("Alamat", item.pemohon_alamat)}
+          {row("No. Telp", item.pemohon_telp)}
+          {row("Keperluan", item.keperluan)}
+          {row("Catatan", item.catatan)}
+          {item.status === "Ditolak" && row("Alasan Ditolak", <span className="text-rose-600 dark:text-rose-400">{item.alasan_tolak}</span>)}
+          {item.approved_nama && row("Disetujui oleh", `${item.approved_nama} (${item.approved_jabatan})${item.approved_at ? " • " + new Date(item.approved_at).toLocaleDateString("id-ID") : ""}`)}
+        </div>
+        <button onClick={onPrint} className="w-full inline-flex items-center justify-center gap-2 rounded-2xl gradient-primary text-primary-foreground py-2.5 text-sm font-semibold shadow-glow min-h-[44px]">
+          <Printer className="h-4 w-4" /> Cetak / Download PDF
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function SuratPrint({
   item, identity, ketuaRT, onClose,
 }: {
