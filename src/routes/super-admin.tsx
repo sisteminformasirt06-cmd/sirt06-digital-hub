@@ -35,8 +35,16 @@ const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
 ];
 
 function SuperAdminPage() {
-  const { user } = useAuth();
+  const { user, loadingSession } = useAuth();
   const [tab, setTab] = useState<Tab>("dashboard");
+
+  if (loadingSession) {
+    return (
+      <div className="max-w-md mx-auto glass-strong rounded-3xl p-6 text-center">
+        <div className="text-sm font-semibold text-muted-foreground">Memuat sesi…</div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
