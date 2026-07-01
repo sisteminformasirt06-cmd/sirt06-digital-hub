@@ -39,7 +39,7 @@ function LoginPage() {
       if (r.harusGantiPin) {
         navigate({ to: "/ganti-pin" });
       } else {
-        navigate({ to: "/" });
+        navigate({ to: "/super-admin" });
       }
     } finally {
       setBusy(false);

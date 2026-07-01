@@ -12,6 +12,30 @@ export const loginWithPin = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { createSession, logAudit, getCurrentPengurus } = await import("./auth-session.server");
+    // Auto-init: buat akun Super Admin default (PIN 123456) jika belum ada
+    const { count: saCount } = await supabaseAdmin
+      .from("pengurus")
+      .select("id", { count: "exact", head: true })
+      .eq("jabatan", "super_admin");
+    if (!saCount || saCount === 0) {
+      const { data: created } = await supabaseAdmin
+        .from("pengurus")
+        .insert({
+          nama: "Super Admin",
+          jabatan: "super_admin",
+          pin_hash: "placeholder",
+          aktif: true,
+          harus_ganti_pin: true,
+        })
+        .select("id")
+        .single();
+      if (created) {
+        await supabaseAdmin.rpc("pengurus_set_pin", { _id: created.id, _pin: "123456" });
+        await supabaseAdmin
+          .from("user_roles")
+          .insert({ pengurus_id: created.id, role: "super_admin" });
+      }
+    }
     const { data: res, error } = await supabaseAdmin.rpc("pengurus_attempt_login", { _pin: data.pin });
     if (error) throw new Error(error.message);
     const r = res as any;
