@@ -4,13 +4,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   FileText, Plus, Printer, Trash2, Check, X, Clock, Loader2, Search,
-  Filter, CheckCircle2, XCircle, AlertCircle,
+  CheckCircle2, XCircle, AlertCircle, Eye, Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 import { useSettings } from "@/lib/settings-context";
 import {
-  listSurat, createSurat, updateSuratStatus, deleteSurat, JENIS_SURAT,
+  listSurat, createSurat, updateSurat, updateSuratStatus, deleteSurat, JENIS_SURAT,
 } from "@/lib/surat.functions";
 
 export const Route = createFileRoute("/administrasi")({
@@ -54,6 +54,7 @@ function AdministrasiPage() {
   const qc = useQueryClient();
   const fnList = useServerFn(listSurat);
   const fnCreate = useServerFn(createSurat);
+  const fnUpdate = useServerFn(updateSurat);
   const fnStatus = useServerFn(updateSuratStatus);
   const fnDelete = useServerFn(deleteSurat);
 
@@ -61,6 +62,8 @@ function AdministrasiPage() {
   const surat = (q.data ?? []) as Surat[];
 
   const [openForm, setOpenForm] = useState(false);
+  const [editItem, setEditItem] = useState<Surat | null>(null);
+  const [detailItem, setDetailItem] = useState<Surat | null>(null);
   const [printItem, setPrintItem] = useState<Surat | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"" | Surat["status"]>("");
@@ -98,6 +101,31 @@ function AdministrasiPage() {
       setOpenForm(false);
       toast.success("Pengajuan surat tersimpan");
       logAction("Ajukan surat", "Administrasi", `${payload.jenis} — ${payload.pemohon_nama}`);
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
+
+  async function handleEdit(payload: {
+    jenis: string; jenisKode: string; pemohon_nama: string;
+    pemohon_nik?: string; pemohon_alamat?: string; pemohon_telp?: string;
+    keperluan: string; catatan?: string;
+  }) {
+    if (!editItem) return;
+    try {
+      await fnUpdate({ data: {
+        id: editItem.id,
+        jenis: payload.jenis,
+        pemohon_nama: payload.pemohon_nama,
+        pemohon_nik: payload.pemohon_nik,
+        pemohon_alamat: payload.pemohon_alamat,
+        pemohon_telp: payload.pemohon_telp,
+        keperluan: payload.keperluan,
+        catatan: payload.catatan,
+      } });
+      await qc.invalidateQueries({ queryKey: ["surat"] });
+      setEditItem(null);
+      toast.success("Pengajuan diperbarui");
     } catch (e) {
       toast.error((e as Error).message);
     }
@@ -222,9 +250,17 @@ function AdministrasiPage() {
                 </div>
               </div>
               <div className="flex flex-wrap gap-1.5 pt-1 border-t border-border">
+                <button onClick={() => setDetailItem(s)} className="inline-flex items-center gap-1 rounded-xl glass px-2.5 py-1.5 text-[11px] font-semibold min-h-[36px]">
+                  <Eye className="h-3.5 w-3.5" /> Detail
+                </button>
                 <button onClick={() => setPrintItem(s)} className="inline-flex items-center gap-1 rounded-xl glass px-2.5 py-1.5 text-[11px] font-semibold min-h-[36px]">
                   <Printer className="h-3.5 w-3.5" /> Cetak / PDF
                 </button>
+                {isPengurus && (s.status === "Menunggu" || s.status === "Diproses") && (
+                  <button onClick={() => setEditItem(s)} className="inline-flex items-center gap-1 rounded-xl bg-amber-500/15 text-amber-600 px-2.5 py-1.5 text-[11px] font-semibold min-h-[36px]">
+                    <Pencil className="h-3.5 w-3.5" /> Edit
+                  </button>
+                )}
                 {isPengurus && s.status === "Menunggu" && (
                   <button onClick={() => changeStatus(s, "Diproses")} className="inline-flex items-center gap-1 rounded-xl bg-blue-500/15 text-blue-600 px-2.5 py-1.5 text-[11px] font-semibold min-h-[36px]">
                     <Loader2 className="h-3.5 w-3.5" /> Proses
@@ -254,13 +290,15 @@ function AdministrasiPage() {
       )}
 
       {openForm && <SuratForm onClose={() => setOpenForm(false)} onSubmit={handleCreate} />}
+      {editItem && <SuratForm initial={editItem} onClose={() => setEditItem(null)} onSubmit={handleEdit} />}
+      {detailItem && <SuratDetail item={detailItem} onClose={() => setDetailItem(null)} onPrint={() => { setPrintItem(detailItem); setDetailItem(null); }} />}
       {printItem && <SuratPrint item={printItem} identity={identity} ketuaRT={pengurus.ketuaRT} onClose={() => setPrintItem(null)} />}
     </div>
   );
 }
 
 function SuratForm({
-  onClose, onSubmit,
+  onClose, onSubmit, initial,
 }: {
   onClose: () => void;
   onSubmit: (d: {
@@ -268,15 +306,19 @@ function SuratForm({
     pemohon_nik?: string; pemohon_alamat?: string; pemohon_telp?: string;
     keperluan: string; catatan?: string;
   }) => Promise<void>;
+  initial?: Surat;
 }) {
-  const [jenisKode, setJenisKode] = useState<string>(JENIS_SURAT[0].kode);
-  const [jenisCustom, setJenisCustom] = useState("");
-  const [nama, setNama] = useState("");
-  const [nik, setNik] = useState("");
-  const [alamat, setAlamat] = useState("");
-  const [telp, setTelp] = useState("");
-  const [keperluan, setKeperluan] = useState("");
-  const [catatan, setCatatan] = useState("");
+  const initialKode = initial
+    ? (JENIS_SURAT.find((j) => j.label === initial.jenis)?.kode ?? "LAIN")
+    : JENIS_SURAT[0].kode;
+  const [jenisKode, setJenisKode] = useState<string>(initialKode);
+  const [jenisCustom, setJenisCustom] = useState(initialKode === "LAIN" && initial ? initial.jenis : "");
+  const [nama, setNama] = useState(initial?.pemohon_nama ?? "");
+  const [nik, setNik] = useState(initial?.pemohon_nik ?? "");
+  const [alamat, setAlamat] = useState(initial?.pemohon_alamat ?? "");
+  const [telp, setTelp] = useState(initial?.pemohon_telp ?? "");
+  const [keperluan, setKeperluan] = useState(initial?.keperluan ?? "");
+  const [catatan, setCatatan] = useState(initial?.catatan ?? "");
   const [submitting, setSubmitting] = useState(false);
 
   const jenisPreset = JENIS_SURAT.find((j) => j.kode === jenisKode);
@@ -306,7 +348,7 @@ function SuratForm({
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-end sm:place-items-center p-2 sm:p-4">
       <form onSubmit={submit} className="w-full max-w-lg glass-strong rounded-3xl p-4 space-y-3 max-h-[92vh] overflow-y-auto">
         <div className="flex items-center justify-between">
-          <div className="text-base font-bold">Ajukan Surat</div>
+          <div className="text-base font-bold">{initial ? "Edit Pengajuan" : "Ajukan Surat"}</div>
           <button type="button" onClick={onClose} className="p-2 rounded-xl glass"><X className="h-4 w-4" /></button>
         </div>
         <div className="space-y-1">
@@ -348,6 +390,44 @@ function SuratForm({
           {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Kirim Pengajuan
         </button>
       </form>
+    </div>
+  );
+}
+
+function SuratDetail({ item, onClose, onPrint }: { item: Surat; onClose: () => void; onPrint: () => void }) {
+  const row = (label: string, value: React.ReactNode) => (
+    <div className="grid grid-cols-3 gap-2 text-xs py-1.5 border-b border-border/60 last:border-0">
+      <div className="text-muted-foreground">{label}</div>
+      <div className="col-span-2 font-medium break-words">{value || "—"}</div>
+    </div>
+  );
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-end sm:place-items-center p-2 sm:p-4">
+      <div className="w-full max-w-lg glass-strong rounded-3xl p-4 space-y-3 max-h-[92vh] overflow-y-auto">
+        <div className="flex items-center justify-between">
+          <div className="text-base font-bold">Detail Surat</div>
+          <button onClick={onClose} className="p-2 rounded-xl glass"><X className="h-4 w-4" /></button>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-muted">{item.nomor_surat}</span>
+          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLES[item.status]}`}>{item.status}</span>
+        </div>
+        <div>
+          {row("Jenis", item.jenis)}
+          {row("Tanggal", new Date(item.created_at).toLocaleString("id-ID", { dateStyle: "long", timeStyle: "short" }))}
+          {row("Nama", item.pemohon_nama)}
+          {row("NIK", item.pemohon_nik)}
+          {row("Alamat", item.pemohon_alamat)}
+          {row("No. Telp", item.pemohon_telp)}
+          {row("Keperluan", item.keperluan)}
+          {row("Catatan", item.catatan)}
+          {item.status === "Ditolak" && row("Alasan Ditolak", <span className="text-rose-600 dark:text-rose-400">{item.alasan_tolak}</span>)}
+          {item.approved_nama && row("Disetujui oleh", `${item.approved_nama} (${item.approved_jabatan})${item.approved_at ? " • " + new Date(item.approved_at).toLocaleDateString("id-ID") : ""}`)}
+        </div>
+        <button onClick={onPrint} className="w-full inline-flex items-center justify-center gap-2 rounded-2xl gradient-primary text-primary-foreground py-2.5 text-sm font-semibold shadow-glow min-h-[44px]">
+          <Printer className="h-4 w-4" /> Cetak / Download PDF
+        </button>
+      </div>
     </div>
   );
 }

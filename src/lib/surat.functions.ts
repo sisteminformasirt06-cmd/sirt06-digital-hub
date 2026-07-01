@@ -124,3 +124,37 @@ export const deleteSurat = createServerFn({ method: "POST" })
     await logAudit(me, "Hapus surat", "Administrasi", data.id);
     return { ok: true };
   });
+
+export const updateSurat = createServerFn({ method: "POST" })
+  .inputValidator((d) =>
+    z.object({
+      id: z.string().uuid(),
+      jenis: z.string().min(2).max(80),
+      pemohon_nama: z.string().trim().min(2).max(120),
+      pemohon_nik: z.string().trim().max(32).optional().or(z.literal("")),
+      pemohon_alamat: z.string().trim().max(300).optional().or(z.literal("")),
+      pemohon_telp: z.string().trim().max(40).optional().or(z.literal("")),
+      keperluan: z.string().trim().min(3).max(500),
+      catatan: z.string().trim().max(500).optional().or(z.literal("")),
+    }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { requirePengurus, logAudit } = await import("./auth-session.server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const me = await requirePengurus();
+    const { error } = await supabaseAdmin
+      .from("surat_pengajuan")
+      .update({
+        jenis: data.jenis,
+        pemohon_nama: data.pemohon_nama,
+        pemohon_nik: data.pemohon_nik || null,
+        pemohon_alamat: data.pemohon_alamat || null,
+        pemohon_telp: data.pemohon_telp || null,
+        keperluan: data.keperluan,
+        catatan: data.catatan || null,
+      })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    await logAudit(me, "Ubah surat", "Administrasi", `${data.jenis} — ${data.pemohon_nama}`);
+    return { ok: true };
+  });
