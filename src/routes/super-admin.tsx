@@ -2,11 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import {
   ShieldCheck, Users, KeySquare, Settings, FileText, History,
-  Database, Plus, Trash2, RotateCcw, Power, Filter, Crown, Activity,
+  Database, Plus, Trash2, RotateCcw, Power, Filter, Crown, Activity, LogOut,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth, ROLES, type Role } from "@/lib/auth-context";
+import { useNavigate } from "@tanstack/react-router";
 import {
   listPengurus, createPengurus, updatePengurus, deletePengurus, resetPin, listAudit,
 } from "@/lib/pengurus.functions";
@@ -35,7 +36,8 @@ const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
 ];
 
 function SuperAdminPage() {
-  const { user, loadingSession } = useAuth();
+  const { user, loadingSession, logout } = useAuth();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("dashboard");
 
   if (loadingSession) {
@@ -75,8 +77,15 @@ function SuperAdminPage() {
         </div>
         <div className="min-w-0">
           <h1 className="text-lg sm:text-xl font-bold leading-tight">Super Admin</h1>
-          <p className="text-[11px] text-muted-foreground">Pusat kontrol sistem SiRT 06 Digital</p>
+          <p className="text-[11px] text-muted-foreground">Login sebagai <b>{user.nama}</b> · {user.role}</p>
         </div>
+        <button
+          onClick={async () => { await logout(); navigate({ to: "/" }); }}
+          className="ml-auto inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-destructive/90 text-destructive-foreground text-xs font-semibold"
+          title="Logout"
+        >
+          <LogOut className="h-3.5 w-3.5" /> Logout
+        </button>
       </header>
 
       <nav className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
