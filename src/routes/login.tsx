@@ -65,7 +65,7 @@ function LoginPage() {
             </button>
           )}
           <button
-            onClick={async () => { await logout(); navigate({ to: "/login" }); }}
+            onClick={async () => { await logout(); navigate({ to: "/" }); }}
             className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-destructive text-destructive-foreground py-3 font-semibold"
           >
             <LogOut className="h-4 w-4" /> Logout

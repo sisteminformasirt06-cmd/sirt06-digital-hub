@@ -11,7 +11,7 @@ export const Route = createFileRoute("/ganti-pin")({
 });
 
 function GantiPinPage() {
-  const { user, refresh } = useAuth();
+  const { user, refresh, loadingSession } = useAuth();
   const fn = useServerFn(changeMyPin);
   const navigate = useNavigate();
   const [oldPin, setOldPin] = useState("");
@@ -20,6 +20,14 @@ function GantiPinPage() {
   const [err, setErr] = useState<string | null>(null);
   const [ok, setOk] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  if (loadingSession) {
+    return (
+      <div className="max-w-md mx-auto glass-strong rounded-3xl p-6 text-center">
+        <div className="text-sm font-semibold text-muted-foreground">Memuat sesi…</div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (

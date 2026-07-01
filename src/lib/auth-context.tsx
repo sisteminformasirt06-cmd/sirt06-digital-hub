@@ -208,7 +208,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthCtx>(() => ({
     user,
     sessionUser,
-    loadingSession: sessionQ.isPending,
+    loadingSession: sessionQ.isPending || sessionQ.isFetching,
     users,
     audit: [],
     login, logout, addUser, updateUser, removeUser, logAction, hasRole, refresh,
