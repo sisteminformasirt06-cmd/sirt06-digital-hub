@@ -1,10 +1,14 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { Menu, Moon, Sun, RefreshCw, Bell, LogIn, ShieldCheck, LogOut } from "lucide-react";
+import {
+  Menu, Moon, Sun, RefreshCw, Bell, LogIn, ShieldCheck, LogOut,
+  LayoutDashboard, Users, FileText, Wallet, Boxes, QrCode, Store,
+  MessageSquareWarning, Siren, Newspaper, MessageCircle, Settings, Crown,
+} from "lucide-react";
 import logo from "@/assets/logo-rt.png";
 import { useTheme } from "@/lib/theme-context";
 import { useAuth } from "@/lib/auth-context";
-import { navItems } from "./nav-config";
+import { navItems, type NavItem } from "./nav-config";
 import { cn } from "@/lib/utils";
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -124,9 +128,15 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 function SidebarInner({ pathname, role }: { pathname: string; role?: string }) {
-  // Anonim/publik → tampilkan menu yang boleh diakses "Warga".
-  const effective = role ?? "Warga";
-  const items = navItems.filter((it) => !it.roles || it.roles.includes(effective as never));
+  // Logged-in pengurus (semua role admin) → menu ADMIN lengkap.
+  // Belum login → menu publik/warga seperti semula.
+  const isAdmin = !!role && role !== "Warga";
+  const items: NavItem[] = isAdmin
+    ? ADMIN_MENU
+    : navItems.filter((it) => !it.roles || it.roles.includes("Warga" as never));
+  const filtered = isAdmin && role !== "Super Admin"
+    ? items.filter((it) => it.to !== "/super-admin")
+    : items;
   return (
     <>
       <div className="p-5 border-b border-sidebar-border">
@@ -139,7 +149,7 @@ function SidebarInner({ pathname, role }: { pathname: string; role?: string }) {
         </div>
       </div>
       <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
-        {items.map((item) => {
+        {filtered.map((item) => {
           const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
           const Icon = item.icon;
           return (
@@ -167,3 +177,20 @@ function SidebarInner({ pathname, role }: { pathname: string; role?: string }) {
     </>
   );
 }
+
+const ADMIN_MENU: NavItem[] = [
+  { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/warga", label: "Data Warga", icon: Users },
+  { to: "/administrasi", label: "Administrasi", icon: FileText },
+  { to: "/keuangan", label: "Keuangan", icon: Wallet },
+  { to: "/inventaris", label: "Inventaris", icon: Boxes },
+  { to: "/poskamling", label: "Poskamling", icon: ShieldCheck },
+  { to: "/qr-center", label: "QR Center", icon: QrCode },
+  { to: "/emergency", label: "Emergency Center", icon: Siren },
+  { to: "/whatsapp", label: "WhatsApp Center", icon: MessageCircle },
+  { to: "/umkm", label: "UMKM", icon: Store },
+  { to: "/media", label: "Pengumuman", icon: Newspaper },
+  { to: "/kritik-saran", label: "Kritik & Saran", icon: MessageSquareWarning },
+  { to: "/pengaturan", label: "Pengaturan", icon: Settings },
+  { to: "/super-admin", label: "Super Admin", icon: Crown },
+];
