@@ -134,9 +134,7 @@ function SidebarInner({ pathname, role }: { pathname: string; role?: string }) {
   const items: NavItem[] = isAdmin
     ? ADMIN_MENU
     : navItems.filter((it) => !it.roles || it.roles.includes("Warga" as never));
-  const filtered = isAdmin && role !== "Super Admin"
-    ? items.filter((it) => it.to !== "/super-admin")
-    : items;
+  const filtered = items;
   return (
     <>
       <div className="p-5 border-b border-sidebar-border">
