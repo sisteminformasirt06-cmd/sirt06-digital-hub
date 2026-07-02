@@ -1,34 +1,20 @@
-import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import {
-  Menu, Moon, Sun, RefreshCw, Bell, LogIn, ShieldCheck, LogOut,
-  LayoutDashboard, Users, FileText, Wallet, Boxes, QrCode, Store,
-  MessageSquareWarning, Siren, Newspaper, MessageCircle, Settings, Crown,
-} from "lucide-react";
+import { Menu, Moon, Sun, RefreshCw, Bell, LogIn, ShieldCheck } from "lucide-react";
 import logo from "@/assets/logo-rt.png";
 import { useTheme } from "@/lib/theme-context";
 import { useAuth } from "@/lib/auth-context";
-import { navItems, type NavItem } from "./nav-config";
+import { navItems } from "./nav-config";
 import { cn } from "@/lib/utils";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [openMobile, setOpenMobile] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { theme, toggle } = useTheme();
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const role = user?.role;
 
   useEffect(() => setOpenMobile(false), [pathname]);
-
-  const initials = user?.nama
-    ? user.nama.split(" ").slice(0, 2).map((s) => s[0]?.toUpperCase() ?? "").join("")
-    : "";
-
-  const onLogout = async () => {
-    await logout();
-    navigate({ to: "/" });
-  };
 
   return (
     <div className="app-bg min-h-screen flex w-full text-foreground">
@@ -69,28 +55,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="flex-1" />
 
             {user ? (
-              <div className="flex items-center gap-2">
-                <div className="hidden sm:flex items-center gap-2 px-2 py-1 rounded-xl glass">
-                  <div className="h-8 w-8 rounded-full grid place-items-center gradient-primary text-primary-foreground text-xs font-bold shadow-glow">
-                    {initials || <ShieldCheck className="h-4 w-4" />}
-                  </div>
-                  <div className="min-w-0 leading-tight">
-                    <div className="text-xs font-bold truncate max-w-[140px]">{user.nama}</div>
-                    <div className="text-[10px] text-primary font-semibold flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block" />
-                      {user.role}
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={onLogout}
-                  title="Logout"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-destructive text-destructive-foreground text-xs font-semibold hover:opacity-90"
-                >
-                  <LogOut className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Logout</span>
-                </button>
-              </div>
+              <Link to="/login" title={`${user.nama} · ${user.role}`} className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl glass text-xs font-semibold">
+                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                <span className="max-w-[120px] truncate">{user.nama}</span>
+              </Link>
             ) : (
               <Link to="/login" className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold shadow-glow">
                 <LogIn className="h-3.5 w-3.5" /> Login
@@ -128,13 +96,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 function SidebarInner({ pathname, role }: { pathname: string; role?: string }) {
-  // Logged-in pengurus (semua role admin) → menu ADMIN lengkap.
-  // Belum login → menu publik/warga seperti semula.
-  const isAdmin = !!role && role !== "Warga";
-  const items: NavItem[] = isAdmin
-    ? ADMIN_MENU
-    : navItems.filter((it) => !it.roles || it.roles.includes("Warga" as never));
-  const filtered = items;
+  const items = navItems.filter((it) => !it.roles || (role && it.roles.includes(role as never)));
   return (
     <>
       <div className="p-5 border-b border-sidebar-border">
@@ -147,7 +109,7 @@ function SidebarInner({ pathname, role }: { pathname: string; role?: string }) {
         </div>
       </div>
       <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
-        {filtered.map((item) => {
+        {items.map((item) => {
           const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
           const Icon = item.icon;
           return (
@@ -175,20 +137,3 @@ function SidebarInner({ pathname, role }: { pathname: string; role?: string }) {
     </>
   );
 }
-
-const ADMIN_MENU: NavItem[] = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/warga", label: "Data Warga", icon: Users },
-  { to: "/administrasi", label: "Administrasi", icon: FileText },
-  { to: "/keuangan", label: "Keuangan", icon: Wallet },
-  { to: "/inventaris", label: "Inventaris", icon: Boxes },
-  { to: "/poskamling", label: "Poskamling", icon: ShieldCheck },
-  { to: "/qr-center", label: "QR Center", icon: QrCode },
-  { to: "/emergency", label: "Emergency Center", icon: Siren },
-  { to: "/whatsapp", label: "WhatsApp Center", icon: MessageCircle },
-  { to: "/umkm", label: "UMKM", icon: Store },
-  { to: "/media", label: "Pengumuman", icon: Newspaper },
-  { to: "/kritik-saran", label: "Kritik & Saran", icon: MessageSquareWarning },
-  { to: "/pengaturan", label: "Pengaturan", icon: Settings },
-  { to: "/super-admin", label: "Super Admin", icon: Crown },
-];
