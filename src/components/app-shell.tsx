@@ -1,6 +1,6 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { Menu, Moon, Sun, RefreshCw, Bell, LogIn, ShieldCheck } from "lucide-react";
+import { Menu, Moon, Sun, RefreshCw, Bell, LogIn, ShieldCheck, LogOut } from "lucide-react";
 import logo from "@/assets/logo-rt.png";
 import { useTheme } from "@/lib/theme-context";
 import { useAuth } from "@/lib/auth-context";
@@ -11,10 +11,20 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [openMobile, setOpenMobile] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { theme, toggle } = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const role = user?.role;
 
   useEffect(() => setOpenMobile(false), [pathname]);
+
+  const initials = user?.nama
+    ? user.nama.split(" ").slice(0, 2).map((s) => s[0]?.toUpperCase() ?? "").join("")
+    : "";
+
+  const onLogout = async () => {
+    await logout();
+    navigate({ to: "/" });
+  };
 
   return (
     <div className="app-bg min-h-screen flex w-full text-foreground">
@@ -55,10 +65,28 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="flex-1" />
 
             {user ? (
-              <Link to="/login" title={`${user.nama} · ${user.role}`} className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl glass text-xs font-semibold">
-                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                <span className="max-w-[120px] truncate">{user.nama}</span>
-              </Link>
+              <div className="flex items-center gap-2">
+                <div className="hidden sm:flex items-center gap-2 px-2 py-1 rounded-xl glass">
+                  <div className="h-8 w-8 rounded-full grid place-items-center gradient-primary text-primary-foreground text-xs font-bold shadow-glow">
+                    {initials || <ShieldCheck className="h-4 w-4" />}
+                  </div>
+                  <div className="min-w-0 leading-tight">
+                    <div className="text-xs font-bold truncate max-w-[140px]">{user.nama}</div>
+                    <div className="text-[10px] text-primary font-semibold flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block" />
+                      {user.role}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={onLogout}
+                  title="Logout"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-destructive text-destructive-foreground text-xs font-semibold hover:opacity-90"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              </div>
             ) : (
               <Link to="/login" className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold shadow-glow">
                 <LogIn className="h-3.5 w-3.5" /> Login
@@ -96,7 +124,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 function SidebarInner({ pathname, role }: { pathname: string; role?: string }) {
-  const items = navItems.filter((it) => !it.roles || (role && it.roles.includes(role as never)));
+  // Anonim/publik → tampilkan menu yang boleh diakses "Warga".
+  const effective = role ?? "Warga";
+  const items = navItems.filter((it) => !it.roles || it.roles.includes(effective as never));
   return (
     <>
       <div className="p-5 border-b border-sidebar-border">
