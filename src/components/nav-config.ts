@@ -13,11 +13,6 @@ export interface NavItem {
   roles?: Role[];
 }
 
-const ALL: Role[] = [
-  "Super Admin","Ketua RT","Sekretaris","Bendahara","Bendahara 1","Bendahara 2",
-  "Humas","Keamanan 1","Keamanan 2","Sie Kematian","Sie Umum","Sie Perlengkapan",
-  "Sie Keamanan","Sie Sosial","Sie Humas","Sie Pemuda","Sie Lingkungan","Admin","Warga",
-];
 const STAFF: Role[] = [
   "Humas","Keamanan 1","Keamanan 2","Sie Kematian","Sie Umum","Sie Perlengkapan",
   "Sie Keamanan","Sie Sosial","Sie Humas","Sie Pemuda","Sie Lingkungan","Admin",
@@ -26,11 +21,13 @@ const BENDAHARA: Role[] = ["Bendahara","Bendahara 1","Bendahara 2"];
 const SEKRETARIS: Role[] = ["Sekretaris"];
 const KETUA: Role[] = ["Ketua RT"];
 const SUPER: Role[] = ["Super Admin"];
+const ALL_LOGIN: Role[] = [...SUPER, ...KETUA, ...SEKRETARIS, ...BENDAHARA, ...STAFF];
+const ALL_INCL_WARGA: Role[] = [...ALL_LOGIN, "Warga"];
 
 // Undefined roles = public (semua termasuk yang belum login).
 // Roles yang diisi = whitelist role yang boleh melihat menu.
 export const navItems: readonly NavItem[] = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/", label: "Dashboard", icon: LayoutDashboard, roles: ALL_INCL_WARGA },
   { to: "/warga", label: "Data Warga", icon: Users,
     roles: [...SUPER, ...KETUA, ...SEKRETARIS, ...STAFF] },
   { to: "/warga", label: "Data KK", icon: Home,
@@ -49,24 +46,23 @@ export const navItems: readonly NavItem[] = [
     roles: [...SUPER, ...KETUA, ...SEKRETARIS] },
   { to: "/absensi", label: "Agenda", icon: CalendarCheck,
     roles: [...SUPER, ...KETUA, ...SEKRETARIS] },
-  { to: "/media", label: "Pengumuman", icon: Newspaper },
+  { to: "/media", label: "Pengumuman", icon: Newspaper,
+    roles: [...SUPER, ...KETUA, ...SEKRETARIS, ...STAFF, "Warga"] },
   { to: "/inventaris", label: "Inventaris", icon: Boxes,
     roles: [...SUPER, ...KETUA, ...STAFF] },
   { to: "/poskamling", label: "Poskamling", icon: ShieldCheck,
     roles: [...SUPER, ...KETUA, ...STAFF] },
   { to: "/qr-center", label: "QR Center", icon: QrCode,
     roles: [...SUPER, ...KETUA] },
-  { to: "/emergency", label: "Emergency Center", icon: Siren },
+  { to: "/emergency", label: "Emergency Center", icon: Siren, roles: ALL_INCL_WARGA },
   { to: "/keuangan", label: "Laporan", icon: BarChart3,
     roles: [...SUPER, ...KETUA, ...BENDAHARA] },
   { to: "/administrasi", label: "Dokumen", icon: FolderArchive,
     roles: [...SUPER, ...KETUA, ...SEKRETARIS] },
   { to: "/whatsapp", label: "WhatsApp Center", icon: MessageCircle,
     roles: [...SUPER, ...KETUA] },
-  { to: "/umkm", label: "UMKM Warga", icon: Store },
-  { to: "/kritik-saran", label: "Kritik & Saran", icon: MessageSquareWarning },
+  { to: "/umkm", label: "UMKM Warga", icon: Store, roles: ALL_INCL_WARGA },
+  { to: "/kritik-saran", label: "Kritik & Saran", icon: MessageSquareWarning, roles: ALL_INCL_WARGA },
   { to: "/pengaturan", label: "Pengaturan", icon: Settings, roles: SUPER },
   { to: "/super-admin", label: "Super Admin", icon: Crown, roles: SUPER },
 ];
-
-void ALL;
