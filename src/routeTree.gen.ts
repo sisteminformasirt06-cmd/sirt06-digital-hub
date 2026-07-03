@@ -23,6 +23,7 @@ import { Route as KeuanganRouteImport } from './routes/keuangan'
 import { Route as InventarisRouteImport } from './routes/inventaris'
 import { Route as GantiPinRouteImport } from './routes/ganti-pin'
 import { Route as EmergencyRouteImport } from './routes/emergency'
+import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AdministrasiRouteImport } from './routes/administrasi'
 import { Route as AbsensiRouteImport } from './routes/absensi'
 import { Route as IndexRouteImport } from './routes/index'
@@ -97,6 +98,11 @@ const EmergencyRoute = EmergencyRouteImport.update({
   path: '/emergency',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgendaRoute = AgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdministrasiRoute = AdministrasiRouteImport.update({
   id: '/administrasi',
   path: '/administrasi',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/absensi': typeof AbsensiRoute
   '/administrasi': typeof AdministrasiRoute
+  '/agenda': typeof AgendaRoute
   '/emergency': typeof EmergencyRoute
   '/ganti-pin': typeof GantiPinRoute
   '/inventaris': typeof InventarisRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/absensi': typeof AbsensiRoute
   '/administrasi': typeof AdministrasiRoute
+  '/agenda': typeof AgendaRoute
   '/emergency': typeof EmergencyRoute
   '/ganti-pin': typeof GantiPinRoute
   '/inventaris': typeof InventarisRoute
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/absensi': typeof AbsensiRoute
   '/administrasi': typeof AdministrasiRoute
+  '/agenda': typeof AgendaRoute
   '/emergency': typeof EmergencyRoute
   '/ganti-pin': typeof GantiPinRoute
   '/inventaris': typeof InventarisRoute
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/'
     | '/absensi'
     | '/administrasi'
+    | '/agenda'
     | '/emergency'
     | '/ganti-pin'
     | '/inventaris'
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/'
     | '/absensi'
     | '/administrasi'
+    | '/agenda'
     | '/emergency'
     | '/ganti-pin'
     | '/inventaris'
@@ -215,6 +226,7 @@ export interface FileRouteTypes {
     | '/'
     | '/absensi'
     | '/administrasi'
+    | '/agenda'
     | '/emergency'
     | '/ganti-pin'
     | '/inventaris'
@@ -235,6 +247,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AbsensiRoute: typeof AbsensiRoute
   AdministrasiRoute: typeof AdministrasiRoute
+  AgendaRoute: typeof AgendaRoute
   EmergencyRoute: typeof EmergencyRoute
   GantiPinRoute: typeof GantiPinRoute
   InventarisRoute: typeof InventarisRoute
@@ -351,6 +364,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmergencyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agenda': {
+      id: '/agenda'
+      path: '/agenda'
+      fullPath: '/agenda'
+      preLoaderRoute: typeof AgendaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/administrasi': {
       id: '/administrasi'
       path: '/administrasi'
@@ -379,6 +399,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AbsensiRoute: AbsensiRoute,
   AdministrasiRoute: AdministrasiRoute,
+  AgendaRoute: AgendaRoute,
   EmergencyRoute: EmergencyRoute,
   GantiPinRoute: GantiPinRoute,
   InventarisRoute: InventarisRoute,
