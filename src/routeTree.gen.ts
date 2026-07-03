@@ -15,6 +15,7 @@ import { Route as UmkmRouteImport } from './routes/umkm'
 import { Route as TentangRtRouteImport } from './routes/tentang-rt'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SupabasePanelRouteImport } from './routes/supabase-panel'
+import { Route as RolePermissionRouteImport } from './routes/role-permission'
 import { Route as QrCenterRouteImport } from './routes/qr-center'
 import { Route as PoskamlingRouteImport } from './routes/poskamling'
 import { Route as PengaturanRouteImport } from './routes/pengaturan'
@@ -65,6 +66,11 @@ const SuperAdminRoute = SuperAdminRouteImport.update({
 const SupabasePanelRoute = SupabasePanelRouteImport.update({
   id: '/supabase-panel',
   path: '/supabase-panel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RolePermissionRoute = RolePermissionRouteImport.update({
+  id: '/role-permission',
+  path: '/role-permission',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QrCenterRoute = QrCenterRouteImport.update({
@@ -195,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
+  '/role-permission': typeof RolePermissionRoute
   '/supabase-panel': typeof SupabasePanelRoute
   '/super-admin': typeof SuperAdminRoute
   '/tentang-rt': typeof TentangRtRoute
@@ -224,6 +231,7 @@ export interface FileRoutesByTo {
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
+  '/role-permission': typeof RolePermissionRoute
   '/supabase-panel': typeof SupabasePanelRoute
   '/super-admin': typeof SuperAdminRoute
   '/tentang-rt': typeof TentangRtRoute
@@ -254,6 +262,7 @@ export interface FileRoutesById {
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
+  '/role-permission': typeof RolePermissionRoute
   '/supabase-panel': typeof SupabasePanelRoute
   '/super-admin': typeof SuperAdminRoute
   '/tentang-rt': typeof TentangRtRoute
@@ -285,6 +294,7 @@ export interface FileRouteTypes {
     | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
+    | '/role-permission'
     | '/supabase-panel'
     | '/super-admin'
     | '/tentang-rt'
@@ -314,6 +324,7 @@ export interface FileRouteTypes {
     | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
+    | '/role-permission'
     | '/supabase-panel'
     | '/super-admin'
     | '/tentang-rt'
@@ -343,6 +354,7 @@ export interface FileRouteTypes {
     | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
+    | '/role-permission'
     | '/supabase-panel'
     | '/super-admin'
     | '/tentang-rt'
@@ -373,6 +385,7 @@ export interface RootRouteChildren {
   PengaturanRoute: typeof PengaturanRoute
   PoskamlingRoute: typeof PoskamlingRoute
   QrCenterRoute: typeof QrCenterRoute
+  RolePermissionRoute: typeof RolePermissionRoute
   SupabasePanelRoute: typeof SupabasePanelRoute
   SuperAdminRoute: typeof SuperAdminRoute
   TentangRtRoute: typeof TentangRtRoute
@@ -423,6 +436,13 @@ declare module '@tanstack/react-router' {
       path: '/supabase-panel'
       fullPath: '/supabase-panel'
       preLoaderRoute: typeof SupabasePanelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/role-permission': {
+      id: '/role-permission'
+      path: '/role-permission'
+      fullPath: '/role-permission'
+      preLoaderRoute: typeof RolePermissionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/qr-center': {
@@ -597,6 +617,7 @@ const rootRouteChildren: RootRouteChildren = {
   PengaturanRoute: PengaturanRoute,
   PoskamlingRoute: PoskamlingRoute,
   QrCenterRoute: QrCenterRoute,
+  RolePermissionRoute: RolePermissionRoute,
   SupabasePanelRoute: SupabasePanelRoute,
   SuperAdminRoute: SuperAdminRoute,
   TentangRtRoute: TentangRtRoute,
