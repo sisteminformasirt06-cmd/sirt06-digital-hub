@@ -1,55 +1,31 @@
-import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import {
-  getCurrentSession,
-  loginWithPin,
-  logoutSession,
-  recordAudit,
-} from "./auth.functions";
-import {
-  createPengurus,
-  deletePengurus,
-  listPengurus,
-  updatePengurus,
-} from "./pengurus.functions";
-import { labelToJabatan, jabatanToLabel, type Jabatan } from "./role-map";
+  createContext, useCallback, useContext, useEffect, useMemo, useState,
+  type ReactNode,
+} from "react";
 
+// Simplified 4-role system. Legacy role labels kept in the union so existing
+// permission checks (e.g. "Ketua RT", "Sekretaris") still typecheck; only the
+// four canonical roles below are ever assigned at runtime.
 export type Role =
-  | "Super Admin"
-  | "Ketua RT"
-  | "Sekretaris"
-  | "Bendahara"
-  | "Bendahara 1"
-  | "Bendahara 2"
-  | "Humas"
-  | "Keamanan 1"
-  | "Keamanan 2"
-  | "Sie Kematian"
-  | "Sie Umum"
-  | "Sie Perlengkapan"
-  | "Sie Keamanan"
-  | "Sie Sosial"
-  | "Sie Humas"
-  | "Sie Pemuda"
-  | "Sie Lingkungan"
+  | "Warga"
   | "Admin"
-  | "Warga";
+  | "Bendahara"
+  | "Super Admin"
+  // legacy labels retained for type-compat with pre-existing gate checks
+  | "Ketua RT" | "Sekretaris" | "Bendahara 1" | "Bendahara 2"
+  | "Humas" | "Keamanan 1" | "Keamanan 2" | "Sie Kematian"
+  | "Sie Umum" | "Sie Perlengkapan" | "Sie Keamanan"
+  | "Sie Sosial" | "Sie Humas" | "Sie Pemuda" | "Sie Lingkungan";
 
-export const ROLES: Role[] = [
-  "Super Admin", "Ketua RT", "Sekretaris", "Bendahara 1", "Bendahara 2",
-  "Humas", "Keamanan 1", "Keamanan 2", "Sie Perlengkapan", "Sie Kematian",
-  "Sie Umum", "Warga",
-];
+export const ROLES: Role[] = ["Warga", "Admin", "Bendahara", "Super Admin"];
 
 export interface StaffUser {
   id: string;
   nama: string;
   role: Role;
-  pin?: string; // legacy; never returned from server
+  pin?: string;
   aktif: boolean;
   createdAt: string;
-  jabatan?: Jabatan;
   harusGantiPin?: boolean;
   lastLoginAt?: string | null;
   lockedUntil?: string | null;
@@ -59,30 +35,23 @@ export interface StaffUser {
 export interface AuditEntry {
   id: string;
   nama: string;
-  role: Jabatan | string | null;
+  role: string | null;
   aksi: string;
   modul: string;
   detail?: string | null;
   waktu: string;
 }
 
-export interface SessionUser {
-  id: string;
-  nama: string;
-  jabatan: Jabatan;
-  role: Role;
-  harus_ganti_pin: boolean;
-  aktif: boolean;
-}
-
 interface AuthCtx {
   user: StaffUser | null;
-  sessionUser: SessionUser | null;
+  sessionUser: StaffUser | null;
   loadingSession: boolean;
   users: StaffUser[];
   audit: AuditEntry[];
-  login: (pin: string) => Promise<{ ok: boolean; message?: string; harusGantiPin?: boolean; locked?: boolean; until?: string }>;
+  pins: Record<Role, string>;
+  login: (pin: string) => Promise<{ ok: boolean; message?: string; harusGantiPin?: boolean }>;
   logout: () => Promise<void>;
+  setPin: (role: Role, pin: string) => void;
   addUser: (u: Omit<StaffUser, "id" | "createdAt">) => Promise<void>;
   updateUser: (id: string, patch: Partial<StaffUser>) => Promise<void>;
   removeUser: (id: string) => Promise<void>;
@@ -93,126 +62,132 @@ interface AuthCtx {
 
 const Ctx = createContext<AuthCtx | null>(null);
 
+const LS_PINS = "sirt06.pins.v1";
+const LS_SESSION = "sirt06.session.v1";
+const LS_USERS = "sirt06.users.v1";
+const LS_AUDIT = "sirt06.audit.v1";
+
+const DEFAULT_PINS: Record<Role, string> = {
+  "Warga": "111111",
+  "Admin": "222222",
+  "Bendahara": "333333",
+  "Super Admin": "000000",
+} as Record<Role, string>;
+
+function readLS<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch { return fallback; }
+}
+function writeLS(key: string, val: unknown) {
+  if (typeof window === "undefined") return;
+  try { window.localStorage.setItem(key, JSON.stringify(val)); } catch { /* ignore */ }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const qc = useQueryClient();
-  const getSession = useServerFn(getCurrentSession);
-  const doLogin = useServerFn(loginWithPin);
-  const doLogout = useServerFn(logoutSession);
-  const doAudit = useServerFn(recordAudit);
-  const fnList = useServerFn(listPengurus);
-  const fnCreate = useServerFn(createPengurus);
-  const fnUpdate = useServerFn(updatePengurus);
-  const fnDelete = useServerFn(deletePengurus);
+  const [pins, setPins] = useState<Record<Role, string>>(DEFAULT_PINS);
+  const [user, setUser] = useState<StaffUser | null>(null);
+  const [users, setUsers] = useState<StaffUser[]>([]);
+  const [audit, setAudit] = useState<AuditEntry[]>([]);
+  const [loadingSession, setLoadingSession] = useState(true);
 
-  const sessionQ = useQuery({
-    queryKey: ["pengurus", "session"],
-    queryFn: () => getSession(),
-    staleTime: 30_000,
-  });
+  useEffect(() => {
+    setPins({ ...DEFAULT_PINS, ...readLS<Record<Role, string>>(LS_PINS, {} as Record<Role, string>) });
+    setUser(readLS<StaffUser | null>(LS_SESSION, null));
+    setUsers(readLS<StaffUser[]>(LS_USERS, []));
+    setAudit(readLS<AuditEntry[]>(LS_AUDIT, []));
+    setLoadingSession(false);
+  }, []);
 
-  const sessionUser = (sessionQ.data ?? null) as SessionUser | null;
-
-  const usersQ = useQuery({
-    queryKey: ["pengurus", "list"],
-    queryFn: () => fnList(),
-    enabled: !!sessionUser,
-  });
-
-  const users: StaffUser[] = useMemo(() => {
-    const arr = (usersQ.data ?? []) as Array<{
-      id: string; nama: string; jabatan: Jabatan; aktif: boolean;
-      harus_ganti_pin: boolean; gagal_login: number;
-      locked_until: string | null; last_login_at: string | null; created_at: string;
-    }>;
-    return arr.map((u) => ({
-      id: u.id,
-      nama: u.nama,
-      role: jabatanToLabel(u.jabatan),
-      jabatan: u.jabatan,
-      aktif: u.aktif,
-      createdAt: u.created_at,
-      harusGantiPin: u.harus_ganti_pin,
-      gagalLogin: u.gagal_login,
-      lockedUntil: u.locked_until,
-      lastLoginAt: u.last_login_at,
-    }));
-  }, [usersQ.data]);
-
-  const user: StaffUser | null = sessionUser
-    ? {
-        id: sessionUser.id,
-        nama: sessionUser.nama,
-        role: sessionUser.role,
-        jabatan: sessionUser.jabatan,
-        aktif: sessionUser.aktif,
-        createdAt: "",
-        harusGantiPin: sessionUser.harus_ganti_pin,
-      }
-    : null;
-
-  const refresh = useCallback(async () => {
-    await qc.invalidateQueries({ queryKey: ["pengurus"] });
-  }, [qc]);
+  const roleNameMap: Record<Role, string> = {
+    "Warga": "Warga",
+    "Admin": "Admin RT",
+    "Bendahara": "Bendahara RT",
+    "Super Admin": "Super Admin",
+  } as Record<Role, string>;
 
   const login: AuthCtx["login"] = useCallback(async (pin) => {
-    try {
-      const r = await doLogin({ data: { pin } });
-      if (!r.ok) {
-        if (r.locked) {
-          return { ok: false, locked: true, until: r.until, message: `Akun terkunci hingga ${new Date(r.until).toLocaleString("id-ID")}` };
-        }
-        return { ok: false, message: "PIN salah atau akun tidak ditemukan" };
-      }
-      await qc.invalidateQueries({ queryKey: ["pengurus"] });
-      return { ok: true, harusGantiPin: r.harusGantiPin };
-    } catch (e) {
-      return { ok: false, message: (e as Error).message };
-    }
-  }, [doLogin, qc]);
+    const entry = (Object.entries(pins) as [Role, string][]).find(([, v]) => v === pin);
+    if (!entry) return { ok: false, message: "PIN salah atau tidak dikenali" };
+    const [role] = entry;
+    const su: StaffUser = {
+      id: role.toLowerCase().replace(/\s+/g, "-"),
+      nama: roleNameMap[role] ?? role,
+      role,
+      aktif: true,
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+    };
+    setUser(su);
+    writeLS(LS_SESSION, su);
+    return { ok: true };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pins]);
 
   const logout: AuthCtx["logout"] = useCallback(async () => {
-    await doLogout({ data: undefined });
-    await qc.invalidateQueries({ queryKey: ["pengurus"] });
-  }, [doLogout, qc]);
+    setUser(null);
+    writeLS(LS_SESSION, null);
+  }, []);
+
+  const setPin = useCallback((role: Role, pin: string) => {
+    setPins((prev) => {
+      const next = { ...prev, [role]: pin };
+      writeLS(LS_PINS, next);
+      return next;
+    });
+  }, []);
 
   const logAction = useCallback((aksi: string, modul: string, detail?: string) => {
-    void doAudit({ data: { aksi, modul, detail } }).catch(() => {});
-  }, [doAudit]);
+    setAudit((prev) => {
+      const entry: AuditEntry = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        nama: user?.nama ?? "Anonim",
+        role: user?.role ?? null,
+        aksi, modul, detail: detail ?? null,
+        waktu: new Date().toISOString(),
+      };
+      const next = [entry, ...prev].slice(0, 500);
+      writeLS(LS_AUDIT, next);
+      return next;
+    });
+  }, [user]);
 
   const addUser: AuthCtx["addUser"] = useCallback(async (u) => {
-    await fnCreate({
-      data: { nama: u.nama, jabatan: labelToJabatan(u.role), pin: u.pin },
+    setUsers((prev) => {
+      const next: StaffUser[] = [
+        ...prev,
+        { ...u, id: `${Date.now()}`, createdAt: new Date().toISOString() },
+      ];
+      writeLS(LS_USERS, next);
+      return next;
     });
-    await qc.invalidateQueries({ queryKey: ["pengurus", "list"] });
-  }, [fnCreate, qc]);
-
+  }, []);
   const updateUser: AuthCtx["updateUser"] = useCallback(async (id, patch) => {
-    await fnUpdate({
-      data: {
-        id,
-        nama: patch.nama,
-        jabatan: patch.role ? labelToJabatan(patch.role) : undefined,
-        aktif: patch.aktif,
-      },
+    setUsers((prev) => {
+      const next = prev.map((u) => (u.id === id ? { ...u, ...patch } : u));
+      writeLS(LS_USERS, next);
+      return next;
     });
-    await qc.invalidateQueries({ queryKey: ["pengurus", "list"] });
-  }, [fnUpdate, qc]);
-
+  }, []);
   const removeUser: AuthCtx["removeUser"] = useCallback(async (id) => {
-    await fnDelete({ data: { id } });
-    await qc.invalidateQueries({ queryKey: ["pengurus", "list"] });
-  }, [fnDelete, qc]);
+    setUsers((prev) => {
+      const next = prev.filter((u) => u.id !== id);
+      writeLS(LS_USERS, next);
+      return next;
+    });
+  }, []);
 
   const hasRole: AuthCtx["hasRole"] = (...roles) => !!user && roles.includes(user.role);
+  const refresh = useCallback(async () => {}, []);
 
   const value = useMemo<AuthCtx>(() => ({
-    user,
-    sessionUser,
-    loadingSession: sessionQ.isPending,
-    users,
-    audit: [],
-    login, logout, addUser, updateUser, removeUser, logAction, hasRole, refresh,
-  }), [user, sessionUser, sessionQ.isPending, users, login, logout, addUser, updateUser, removeUser, logAction, refresh]);
+    user, sessionUser: user, loadingSession,
+    users, audit, pins,
+    login, logout, setPin, addUser, updateUser, removeUser, logAction, hasRole, refresh,
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [user, loadingSession, users, audit, pins, login, logout, setPin, addUser, updateUser, removeUser, logAction, refresh]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
