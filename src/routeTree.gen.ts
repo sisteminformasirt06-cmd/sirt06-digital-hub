@@ -13,14 +13,22 @@ import { Route as WhatsappRouteImport } from './routes/whatsapp'
 import { Route as WargaRouteImport } from './routes/warga'
 import { Route as UmkmRouteImport } from './routes/umkm'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
+import { Route as SupabasePanelRouteImport } from './routes/supabase-panel'
 import { Route as QrCenterRouteImport } from './routes/qr-center'
 import { Route as PoskamlingRouteImport } from './routes/poskamling'
 import { Route as PengaturanRouteImport } from './routes/pengaturan'
 import { Route as MediaRouteImport } from './routes/media'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LaporanRouteImport } from './routes/laporan'
 import { Route as KritikSaranRouteImport } from './routes/kritik-saran'
 import { Route as KeuanganRouteImport } from './routes/keuangan'
+import { Route as KasTossaRouteImport } from './routes/kas-tossa'
+import { Route as KasSosialRouteImport } from './routes/kas-sosial'
+import { Route as KasRtRouteImport } from './routes/kas-rt'
+import { Route as KasPerkakasRouteImport } from './routes/kas-perkakas'
+import { Route as KasHutRiRouteImport } from './routes/kas-hut-ri'
 import { Route as InventarisRouteImport } from './routes/inventaris'
+import { Route as GoogleDriveRouteImport } from './routes/google-drive'
 import { Route as GantiPinRouteImport } from './routes/ganti-pin'
 import { Route as EmergencyRouteImport } from './routes/emergency'
 import { Route as AgendaRouteImport } from './routes/agenda'
@@ -48,6 +56,11 @@ const SuperAdminRoute = SuperAdminRouteImport.update({
   path: '/super-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SupabasePanelRoute = SupabasePanelRouteImport.update({
+  id: '/supabase-panel',
+  path: '/supabase-panel',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QrCenterRoute = QrCenterRouteImport.update({
   id: '/qr-center',
   path: '/qr-center',
@@ -73,6 +86,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LaporanRoute = LaporanRouteImport.update({
+  id: '/laporan',
+  path: '/laporan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KritikSaranRoute = KritikSaranRouteImport.update({
   id: '/kritik-saran',
   path: '/kritik-saran',
@@ -83,9 +101,39 @@ const KeuanganRoute = KeuanganRouteImport.update({
   path: '/keuangan',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KasTossaRoute = KasTossaRouteImport.update({
+  id: '/kas-tossa',
+  path: '/kas-tossa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KasSosialRoute = KasSosialRouteImport.update({
+  id: '/kas-sosial',
+  path: '/kas-sosial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KasRtRoute = KasRtRouteImport.update({
+  id: '/kas-rt',
+  path: '/kas-rt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KasPerkakasRoute = KasPerkakasRouteImport.update({
+  id: '/kas-perkakas',
+  path: '/kas-perkakas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KasHutRiRoute = KasHutRiRouteImport.update({
+  id: '/kas-hut-ri',
+  path: '/kas-hut-ri',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InventarisRoute = InventarisRouteImport.update({
   id: '/inventaris',
   path: '/inventaris',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GoogleDriveRoute = GoogleDriveRouteImport.update({
+  id: '/google-drive',
+  path: '/google-drive',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GantiPinRoute = GantiPinRouteImport.update({
@@ -126,14 +174,22 @@ export interface FileRoutesByFullPath {
   '/agenda': typeof AgendaRoute
   '/emergency': typeof EmergencyRoute
   '/ganti-pin': typeof GantiPinRoute
+  '/google-drive': typeof GoogleDriveRoute
   '/inventaris': typeof InventarisRoute
+  '/kas-hut-ri': typeof KasHutRiRoute
+  '/kas-perkakas': typeof KasPerkakasRoute
+  '/kas-rt': typeof KasRtRoute
+  '/kas-sosial': typeof KasSosialRoute
+  '/kas-tossa': typeof KasTossaRoute
   '/keuangan': typeof KeuanganRoute
   '/kritik-saran': typeof KritikSaranRoute
+  '/laporan': typeof LaporanRoute
   '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
+  '/supabase-panel': typeof SupabasePanelRoute
   '/super-admin': typeof SuperAdminRoute
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
@@ -146,14 +202,22 @@ export interface FileRoutesByTo {
   '/agenda': typeof AgendaRoute
   '/emergency': typeof EmergencyRoute
   '/ganti-pin': typeof GantiPinRoute
+  '/google-drive': typeof GoogleDriveRoute
   '/inventaris': typeof InventarisRoute
+  '/kas-hut-ri': typeof KasHutRiRoute
+  '/kas-perkakas': typeof KasPerkakasRoute
+  '/kas-rt': typeof KasRtRoute
+  '/kas-sosial': typeof KasSosialRoute
+  '/kas-tossa': typeof KasTossaRoute
   '/keuangan': typeof KeuanganRoute
   '/kritik-saran': typeof KritikSaranRoute
+  '/laporan': typeof LaporanRoute
   '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
+  '/supabase-panel': typeof SupabasePanelRoute
   '/super-admin': typeof SuperAdminRoute
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
@@ -167,14 +231,22 @@ export interface FileRoutesById {
   '/agenda': typeof AgendaRoute
   '/emergency': typeof EmergencyRoute
   '/ganti-pin': typeof GantiPinRoute
+  '/google-drive': typeof GoogleDriveRoute
   '/inventaris': typeof InventarisRoute
+  '/kas-hut-ri': typeof KasHutRiRoute
+  '/kas-perkakas': typeof KasPerkakasRoute
+  '/kas-rt': typeof KasRtRoute
+  '/kas-sosial': typeof KasSosialRoute
+  '/kas-tossa': typeof KasTossaRoute
   '/keuangan': typeof KeuanganRoute
   '/kritik-saran': typeof KritikSaranRoute
+  '/laporan': typeof LaporanRoute
   '/login': typeof LoginRoute
   '/media': typeof MediaRoute
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
+  '/supabase-panel': typeof SupabasePanelRoute
   '/super-admin': typeof SuperAdminRoute
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
@@ -189,14 +261,22 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/emergency'
     | '/ganti-pin'
+    | '/google-drive'
     | '/inventaris'
+    | '/kas-hut-ri'
+    | '/kas-perkakas'
+    | '/kas-rt'
+    | '/kas-sosial'
+    | '/kas-tossa'
     | '/keuangan'
     | '/kritik-saran'
+    | '/laporan'
     | '/login'
     | '/media'
     | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
+    | '/supabase-panel'
     | '/super-admin'
     | '/umkm'
     | '/warga'
@@ -209,14 +289,22 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/emergency'
     | '/ganti-pin'
+    | '/google-drive'
     | '/inventaris'
+    | '/kas-hut-ri'
+    | '/kas-perkakas'
+    | '/kas-rt'
+    | '/kas-sosial'
+    | '/kas-tossa'
     | '/keuangan'
     | '/kritik-saran'
+    | '/laporan'
     | '/login'
     | '/media'
     | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
+    | '/supabase-panel'
     | '/super-admin'
     | '/umkm'
     | '/warga'
@@ -229,14 +317,22 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/emergency'
     | '/ganti-pin'
+    | '/google-drive'
     | '/inventaris'
+    | '/kas-hut-ri'
+    | '/kas-perkakas'
+    | '/kas-rt'
+    | '/kas-sosial'
+    | '/kas-tossa'
     | '/keuangan'
     | '/kritik-saran'
+    | '/laporan'
     | '/login'
     | '/media'
     | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
+    | '/supabase-panel'
     | '/super-admin'
     | '/umkm'
     | '/warga'
@@ -250,14 +346,22 @@ export interface RootRouteChildren {
   AgendaRoute: typeof AgendaRoute
   EmergencyRoute: typeof EmergencyRoute
   GantiPinRoute: typeof GantiPinRoute
+  GoogleDriveRoute: typeof GoogleDriveRoute
   InventarisRoute: typeof InventarisRoute
+  KasHutRiRoute: typeof KasHutRiRoute
+  KasPerkakasRoute: typeof KasPerkakasRoute
+  KasRtRoute: typeof KasRtRoute
+  KasSosialRoute: typeof KasSosialRoute
+  KasTossaRoute: typeof KasTossaRoute
   KeuanganRoute: typeof KeuanganRoute
   KritikSaranRoute: typeof KritikSaranRoute
+  LaporanRoute: typeof LaporanRoute
   LoginRoute: typeof LoginRoute
   MediaRoute: typeof MediaRoute
   PengaturanRoute: typeof PengaturanRoute
   PoskamlingRoute: typeof PoskamlingRoute
   QrCenterRoute: typeof QrCenterRoute
+  SupabasePanelRoute: typeof SupabasePanelRoute
   SuperAdminRoute: typeof SuperAdminRoute
   UmkmRoute: typeof UmkmRoute
   WargaRoute: typeof WargaRoute
@@ -292,6 +396,13 @@ declare module '@tanstack/react-router' {
       path: '/super-admin'
       fullPath: '/super-admin'
       preLoaderRoute: typeof SuperAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/supabase-panel': {
+      id: '/supabase-panel'
+      path: '/supabase-panel'
+      fullPath: '/supabase-panel'
+      preLoaderRoute: typeof SupabasePanelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/qr-center': {
@@ -329,6 +440,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/laporan': {
+      id: '/laporan'
+      path: '/laporan'
+      fullPath: '/laporan'
+      preLoaderRoute: typeof LaporanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/kritik-saran': {
       id: '/kritik-saran'
       path: '/kritik-saran'
@@ -343,11 +461,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KeuanganRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/kas-tossa': {
+      id: '/kas-tossa'
+      path: '/kas-tossa'
+      fullPath: '/kas-tossa'
+      preLoaderRoute: typeof KasTossaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kas-sosial': {
+      id: '/kas-sosial'
+      path: '/kas-sosial'
+      fullPath: '/kas-sosial'
+      preLoaderRoute: typeof KasSosialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kas-rt': {
+      id: '/kas-rt'
+      path: '/kas-rt'
+      fullPath: '/kas-rt'
+      preLoaderRoute: typeof KasRtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kas-perkakas': {
+      id: '/kas-perkakas'
+      path: '/kas-perkakas'
+      fullPath: '/kas-perkakas'
+      preLoaderRoute: typeof KasPerkakasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kas-hut-ri': {
+      id: '/kas-hut-ri'
+      path: '/kas-hut-ri'
+      fullPath: '/kas-hut-ri'
+      preLoaderRoute: typeof KasHutRiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/inventaris': {
       id: '/inventaris'
       path: '/inventaris'
       fullPath: '/inventaris'
       preLoaderRoute: typeof InventarisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/google-drive': {
+      id: '/google-drive'
+      path: '/google-drive'
+      fullPath: '/google-drive'
+      preLoaderRoute: typeof GoogleDriveRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ganti-pin': {
@@ -402,14 +562,22 @@ const rootRouteChildren: RootRouteChildren = {
   AgendaRoute: AgendaRoute,
   EmergencyRoute: EmergencyRoute,
   GantiPinRoute: GantiPinRoute,
+  GoogleDriveRoute: GoogleDriveRoute,
   InventarisRoute: InventarisRoute,
+  KasHutRiRoute: KasHutRiRoute,
+  KasPerkakasRoute: KasPerkakasRoute,
+  KasRtRoute: KasRtRoute,
+  KasSosialRoute: KasSosialRoute,
+  KasTossaRoute: KasTossaRoute,
   KeuanganRoute: KeuanganRoute,
   KritikSaranRoute: KritikSaranRoute,
+  LaporanRoute: LaporanRoute,
   LoginRoute: LoginRoute,
   MediaRoute: MediaRoute,
   PengaturanRoute: PengaturanRoute,
   PoskamlingRoute: PoskamlingRoute,
   QrCenterRoute: QrCenterRoute,
+  SupabasePanelRoute: SupabasePanelRoute,
   SuperAdminRoute: SuperAdminRoute,
   UmkmRoute: UmkmRoute,
   WargaRoute: WargaRoute,
