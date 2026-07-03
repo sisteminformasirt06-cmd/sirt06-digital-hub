@@ -36,11 +36,7 @@ function LoginPage() {
         return;
       }
       setErr(null);
-      if (r.harusGantiPin) {
-        navigate({ to: "/ganti-pin" });
-      } else {
-        navigate({ to: "/super-admin" });
-      }
+      navigate({ to: "/" });
     } finally {
       setBusy(false);
     }
@@ -108,11 +104,11 @@ function LoginPage() {
           </button>
         </form>
         <div className="mt-5 text-[11px] text-muted-foreground text-center flex items-center justify-center gap-1.5">
-          <Lock className="h-3 w-3" /> Sesi aman (cookie httpOnly). PIN default akun baru: <b>123456</b>
+          <Lock className="h-3 w-3" /> Login PIN lokal. Default: Warga <b>111111</b> · Admin <b>222222</b> · Bendahara <b>333333</b> · Super Admin <b>000000</b>
         </div>
       </div>
       <div className="glass rounded-2xl p-3 text-[11px] text-muted-foreground text-center">
-        Salah PIN 5x berturut-turut akan mengunci akun selama 15 menit.
+        Sesi login tersimpan lokal hingga Anda menekan Logout.
       </div>
     </div>
   );
