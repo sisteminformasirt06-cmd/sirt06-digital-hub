@@ -12,17 +12,30 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhatsappRouteImport } from './routes/whatsapp'
 import { Route as WargaRouteImport } from './routes/warga'
 import { Route as UmkmRouteImport } from './routes/umkm'
+import { Route as TentangRtRouteImport } from './routes/tentang-rt'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
+import { Route as SupabasePanelRouteImport } from './routes/supabase-panel'
+import { Route as RolePermissionRouteImport } from './routes/role-permission'
 import { Route as QrCenterRouteImport } from './routes/qr-center'
 import { Route as PoskamlingRouteImport } from './routes/poskamling'
 import { Route as PengaturanRouteImport } from './routes/pengaturan'
 import { Route as MediaRouteImport } from './routes/media'
+import { Route as ManajemenPinRouteImport } from './routes/manajemen-pin'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LaporanRouteImport } from './routes/laporan'
 import { Route as KritikSaranRouteImport } from './routes/kritik-saran'
 import { Route as KeuanganRouteImport } from './routes/keuangan'
+import { Route as KasTossaRouteImport } from './routes/kas-tossa'
+import { Route as KasSosialRouteImport } from './routes/kas-sosial'
+import { Route as KasRtRouteImport } from './routes/kas-rt'
+import { Route as KasPerkakasRouteImport } from './routes/kas-perkakas'
+import { Route as KasHutRiRouteImport } from './routes/kas-hut-ri'
 import { Route as InventarisRouteImport } from './routes/inventaris'
+import { Route as GoogleDriveRouteImport } from './routes/google-drive'
 import { Route as GantiPinRouteImport } from './routes/ganti-pin'
 import { Route as EmergencyRouteImport } from './routes/emergency'
+import { Route as BackupRestoreRouteImport } from './routes/backup-restore'
+import { Route as AuditLogRouteImport } from './routes/audit-log'
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AdministrasiRouteImport } from './routes/administrasi'
 import { Route as AbsensiRouteImport } from './routes/absensi'
@@ -43,9 +56,24 @@ const UmkmRoute = UmkmRouteImport.update({
   path: '/umkm',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TentangRtRoute = TentangRtRouteImport.update({
+  id: '/tentang-rt',
+  path: '/tentang-rt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SuperAdminRoute = SuperAdminRouteImport.update({
   id: '/super-admin',
   path: '/super-admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupabasePanelRoute = SupabasePanelRouteImport.update({
+  id: '/supabase-panel',
+  path: '/supabase-panel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RolePermissionRoute = RolePermissionRouteImport.update({
+  id: '/role-permission',
+  path: '/role-permission',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QrCenterRoute = QrCenterRouteImport.update({
@@ -68,9 +96,19 @@ const MediaRoute = MediaRouteImport.update({
   path: '/media',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ManajemenPinRoute = ManajemenPinRouteImport.update({
+  id: '/manajemen-pin',
+  path: '/manajemen-pin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LaporanRoute = LaporanRouteImport.update({
+  id: '/laporan',
+  path: '/laporan',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KritikSaranRoute = KritikSaranRouteImport.update({
@@ -83,9 +121,39 @@ const KeuanganRoute = KeuanganRouteImport.update({
   path: '/keuangan',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KasTossaRoute = KasTossaRouteImport.update({
+  id: '/kas-tossa',
+  path: '/kas-tossa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KasSosialRoute = KasSosialRouteImport.update({
+  id: '/kas-sosial',
+  path: '/kas-sosial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KasRtRoute = KasRtRouteImport.update({
+  id: '/kas-rt',
+  path: '/kas-rt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KasPerkakasRoute = KasPerkakasRouteImport.update({
+  id: '/kas-perkakas',
+  path: '/kas-perkakas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KasHutRiRoute = KasHutRiRouteImport.update({
+  id: '/kas-hut-ri',
+  path: '/kas-hut-ri',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InventarisRoute = InventarisRouteImport.update({
   id: '/inventaris',
   path: '/inventaris',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GoogleDriveRoute = GoogleDriveRouteImport.update({
+  id: '/google-drive',
+  path: '/google-drive',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GantiPinRoute = GantiPinRouteImport.update({
@@ -96,6 +164,16 @@ const GantiPinRoute = GantiPinRouteImport.update({
 const EmergencyRoute = EmergencyRouteImport.update({
   id: '/emergency',
   path: '/emergency',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BackupRestoreRoute = BackupRestoreRouteImport.update({
+  id: '/backup-restore',
+  path: '/backup-restore',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuditLogRoute = AuditLogRouteImport.update({
+  id: '/audit-log',
+  path: '/audit-log',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AgendaRoute = AgendaRouteImport.update({
@@ -124,17 +202,30 @@ export interface FileRoutesByFullPath {
   '/absensi': typeof AbsensiRoute
   '/administrasi': typeof AdministrasiRoute
   '/agenda': typeof AgendaRoute
+  '/audit-log': typeof AuditLogRoute
+  '/backup-restore': typeof BackupRestoreRoute
   '/emergency': typeof EmergencyRoute
   '/ganti-pin': typeof GantiPinRoute
+  '/google-drive': typeof GoogleDriveRoute
   '/inventaris': typeof InventarisRoute
+  '/kas-hut-ri': typeof KasHutRiRoute
+  '/kas-perkakas': typeof KasPerkakasRoute
+  '/kas-rt': typeof KasRtRoute
+  '/kas-sosial': typeof KasSosialRoute
+  '/kas-tossa': typeof KasTossaRoute
   '/keuangan': typeof KeuanganRoute
   '/kritik-saran': typeof KritikSaranRoute
+  '/laporan': typeof LaporanRoute
   '/login': typeof LoginRoute
+  '/manajemen-pin': typeof ManajemenPinRoute
   '/media': typeof MediaRoute
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
+  '/role-permission': typeof RolePermissionRoute
+  '/supabase-panel': typeof SupabasePanelRoute
   '/super-admin': typeof SuperAdminRoute
+  '/tentang-rt': typeof TentangRtRoute
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
   '/whatsapp': typeof WhatsappRoute
@@ -144,17 +235,30 @@ export interface FileRoutesByTo {
   '/absensi': typeof AbsensiRoute
   '/administrasi': typeof AdministrasiRoute
   '/agenda': typeof AgendaRoute
+  '/audit-log': typeof AuditLogRoute
+  '/backup-restore': typeof BackupRestoreRoute
   '/emergency': typeof EmergencyRoute
   '/ganti-pin': typeof GantiPinRoute
+  '/google-drive': typeof GoogleDriveRoute
   '/inventaris': typeof InventarisRoute
+  '/kas-hut-ri': typeof KasHutRiRoute
+  '/kas-perkakas': typeof KasPerkakasRoute
+  '/kas-rt': typeof KasRtRoute
+  '/kas-sosial': typeof KasSosialRoute
+  '/kas-tossa': typeof KasTossaRoute
   '/keuangan': typeof KeuanganRoute
   '/kritik-saran': typeof KritikSaranRoute
+  '/laporan': typeof LaporanRoute
   '/login': typeof LoginRoute
+  '/manajemen-pin': typeof ManajemenPinRoute
   '/media': typeof MediaRoute
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
+  '/role-permission': typeof RolePermissionRoute
+  '/supabase-panel': typeof SupabasePanelRoute
   '/super-admin': typeof SuperAdminRoute
+  '/tentang-rt': typeof TentangRtRoute
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
   '/whatsapp': typeof WhatsappRoute
@@ -165,17 +269,30 @@ export interface FileRoutesById {
   '/absensi': typeof AbsensiRoute
   '/administrasi': typeof AdministrasiRoute
   '/agenda': typeof AgendaRoute
+  '/audit-log': typeof AuditLogRoute
+  '/backup-restore': typeof BackupRestoreRoute
   '/emergency': typeof EmergencyRoute
   '/ganti-pin': typeof GantiPinRoute
+  '/google-drive': typeof GoogleDriveRoute
   '/inventaris': typeof InventarisRoute
+  '/kas-hut-ri': typeof KasHutRiRoute
+  '/kas-perkakas': typeof KasPerkakasRoute
+  '/kas-rt': typeof KasRtRoute
+  '/kas-sosial': typeof KasSosialRoute
+  '/kas-tossa': typeof KasTossaRoute
   '/keuangan': typeof KeuanganRoute
   '/kritik-saran': typeof KritikSaranRoute
+  '/laporan': typeof LaporanRoute
   '/login': typeof LoginRoute
+  '/manajemen-pin': typeof ManajemenPinRoute
   '/media': typeof MediaRoute
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
   '/qr-center': typeof QrCenterRoute
+  '/role-permission': typeof RolePermissionRoute
+  '/supabase-panel': typeof SupabasePanelRoute
   '/super-admin': typeof SuperAdminRoute
+  '/tentang-rt': typeof TentangRtRoute
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
   '/whatsapp': typeof WhatsappRoute
@@ -187,17 +304,30 @@ export interface FileRouteTypes {
     | '/absensi'
     | '/administrasi'
     | '/agenda'
+    | '/audit-log'
+    | '/backup-restore'
     | '/emergency'
     | '/ganti-pin'
+    | '/google-drive'
     | '/inventaris'
+    | '/kas-hut-ri'
+    | '/kas-perkakas'
+    | '/kas-rt'
+    | '/kas-sosial'
+    | '/kas-tossa'
     | '/keuangan'
     | '/kritik-saran'
+    | '/laporan'
     | '/login'
+    | '/manajemen-pin'
     | '/media'
     | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
+    | '/role-permission'
+    | '/supabase-panel'
     | '/super-admin'
+    | '/tentang-rt'
     | '/umkm'
     | '/warga'
     | '/whatsapp'
@@ -207,17 +337,30 @@ export interface FileRouteTypes {
     | '/absensi'
     | '/administrasi'
     | '/agenda'
+    | '/audit-log'
+    | '/backup-restore'
     | '/emergency'
     | '/ganti-pin'
+    | '/google-drive'
     | '/inventaris'
+    | '/kas-hut-ri'
+    | '/kas-perkakas'
+    | '/kas-rt'
+    | '/kas-sosial'
+    | '/kas-tossa'
     | '/keuangan'
     | '/kritik-saran'
+    | '/laporan'
     | '/login'
+    | '/manajemen-pin'
     | '/media'
     | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
+    | '/role-permission'
+    | '/supabase-panel'
     | '/super-admin'
+    | '/tentang-rt'
     | '/umkm'
     | '/warga'
     | '/whatsapp'
@@ -227,17 +370,30 @@ export interface FileRouteTypes {
     | '/absensi'
     | '/administrasi'
     | '/agenda'
+    | '/audit-log'
+    | '/backup-restore'
     | '/emergency'
     | '/ganti-pin'
+    | '/google-drive'
     | '/inventaris'
+    | '/kas-hut-ri'
+    | '/kas-perkakas'
+    | '/kas-rt'
+    | '/kas-sosial'
+    | '/kas-tossa'
     | '/keuangan'
     | '/kritik-saran'
+    | '/laporan'
     | '/login'
+    | '/manajemen-pin'
     | '/media'
     | '/pengaturan'
     | '/poskamling'
     | '/qr-center'
+    | '/role-permission'
+    | '/supabase-panel'
     | '/super-admin'
+    | '/tentang-rt'
     | '/umkm'
     | '/warga'
     | '/whatsapp'
@@ -248,17 +404,30 @@ export interface RootRouteChildren {
   AbsensiRoute: typeof AbsensiRoute
   AdministrasiRoute: typeof AdministrasiRoute
   AgendaRoute: typeof AgendaRoute
+  AuditLogRoute: typeof AuditLogRoute
+  BackupRestoreRoute: typeof BackupRestoreRoute
   EmergencyRoute: typeof EmergencyRoute
   GantiPinRoute: typeof GantiPinRoute
+  GoogleDriveRoute: typeof GoogleDriveRoute
   InventarisRoute: typeof InventarisRoute
+  KasHutRiRoute: typeof KasHutRiRoute
+  KasPerkakasRoute: typeof KasPerkakasRoute
+  KasRtRoute: typeof KasRtRoute
+  KasSosialRoute: typeof KasSosialRoute
+  KasTossaRoute: typeof KasTossaRoute
   KeuanganRoute: typeof KeuanganRoute
   KritikSaranRoute: typeof KritikSaranRoute
+  LaporanRoute: typeof LaporanRoute
   LoginRoute: typeof LoginRoute
+  ManajemenPinRoute: typeof ManajemenPinRoute
   MediaRoute: typeof MediaRoute
   PengaturanRoute: typeof PengaturanRoute
   PoskamlingRoute: typeof PoskamlingRoute
   QrCenterRoute: typeof QrCenterRoute
+  RolePermissionRoute: typeof RolePermissionRoute
+  SupabasePanelRoute: typeof SupabasePanelRoute
   SuperAdminRoute: typeof SuperAdminRoute
+  TentangRtRoute: typeof TentangRtRoute
   UmkmRoute: typeof UmkmRoute
   WargaRoute: typeof WargaRoute
   WhatsappRoute: typeof WhatsappRoute
@@ -287,11 +456,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UmkmRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tentang-rt': {
+      id: '/tentang-rt'
+      path: '/tentang-rt'
+      fullPath: '/tentang-rt'
+      preLoaderRoute: typeof TentangRtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/super-admin': {
       id: '/super-admin'
       path: '/super-admin'
       fullPath: '/super-admin'
       preLoaderRoute: typeof SuperAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/supabase-panel': {
+      id: '/supabase-panel'
+      path: '/supabase-panel'
+      fullPath: '/supabase-panel'
+      preLoaderRoute: typeof SupabasePanelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/role-permission': {
+      id: '/role-permission'
+      path: '/role-permission'
+      fullPath: '/role-permission'
+      preLoaderRoute: typeof RolePermissionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/qr-center': {
@@ -322,11 +512,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MediaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/manajemen-pin': {
+      id: '/manajemen-pin'
+      path: '/manajemen-pin'
+      fullPath: '/manajemen-pin'
+      preLoaderRoute: typeof ManajemenPinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/laporan': {
+      id: '/laporan'
+      path: '/laporan'
+      fullPath: '/laporan'
+      preLoaderRoute: typeof LaporanRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/kritik-saran': {
@@ -343,11 +547,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KeuanganRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/kas-tossa': {
+      id: '/kas-tossa'
+      path: '/kas-tossa'
+      fullPath: '/kas-tossa'
+      preLoaderRoute: typeof KasTossaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kas-sosial': {
+      id: '/kas-sosial'
+      path: '/kas-sosial'
+      fullPath: '/kas-sosial'
+      preLoaderRoute: typeof KasSosialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kas-rt': {
+      id: '/kas-rt'
+      path: '/kas-rt'
+      fullPath: '/kas-rt'
+      preLoaderRoute: typeof KasRtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kas-perkakas': {
+      id: '/kas-perkakas'
+      path: '/kas-perkakas'
+      fullPath: '/kas-perkakas'
+      preLoaderRoute: typeof KasPerkakasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kas-hut-ri': {
+      id: '/kas-hut-ri'
+      path: '/kas-hut-ri'
+      fullPath: '/kas-hut-ri'
+      preLoaderRoute: typeof KasHutRiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/inventaris': {
       id: '/inventaris'
       path: '/inventaris'
       fullPath: '/inventaris'
       preLoaderRoute: typeof InventarisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/google-drive': {
+      id: '/google-drive'
+      path: '/google-drive'
+      fullPath: '/google-drive'
+      preLoaderRoute: typeof GoogleDriveRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ganti-pin': {
@@ -362,6 +608,20 @@ declare module '@tanstack/react-router' {
       path: '/emergency'
       fullPath: '/emergency'
       preLoaderRoute: typeof EmergencyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/backup-restore': {
+      id: '/backup-restore'
+      path: '/backup-restore'
+      fullPath: '/backup-restore'
+      preLoaderRoute: typeof BackupRestoreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/audit-log': {
+      id: '/audit-log'
+      path: '/audit-log'
+      fullPath: '/audit-log'
+      preLoaderRoute: typeof AuditLogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/agenda': {
@@ -400,17 +660,30 @@ const rootRouteChildren: RootRouteChildren = {
   AbsensiRoute: AbsensiRoute,
   AdministrasiRoute: AdministrasiRoute,
   AgendaRoute: AgendaRoute,
+  AuditLogRoute: AuditLogRoute,
+  BackupRestoreRoute: BackupRestoreRoute,
   EmergencyRoute: EmergencyRoute,
   GantiPinRoute: GantiPinRoute,
+  GoogleDriveRoute: GoogleDriveRoute,
   InventarisRoute: InventarisRoute,
+  KasHutRiRoute: KasHutRiRoute,
+  KasPerkakasRoute: KasPerkakasRoute,
+  KasRtRoute: KasRtRoute,
+  KasSosialRoute: KasSosialRoute,
+  KasTossaRoute: KasTossaRoute,
   KeuanganRoute: KeuanganRoute,
   KritikSaranRoute: KritikSaranRoute,
+  LaporanRoute: LaporanRoute,
   LoginRoute: LoginRoute,
+  ManajemenPinRoute: ManajemenPinRoute,
   MediaRoute: MediaRoute,
   PengaturanRoute: PengaturanRoute,
   PoskamlingRoute: PoskamlingRoute,
   QrCenterRoute: QrCenterRoute,
+  RolePermissionRoute: RolePermissionRoute,
+  SupabasePanelRoute: SupabasePanelRoute,
   SuperAdminRoute: SuperAdminRoute,
+  TentangRtRoute: TentangRtRoute,
   UmkmRoute: UmkmRoute,
   WargaRoute: WargaRoute,
   WhatsappRoute: WhatsappRoute,
@@ -418,3 +691,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

@@ -1,17 +1,17 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { Menu, Moon, Sun, RefreshCw, Bell, LogIn, ShieldCheck } from "lucide-react";
+import { Menu, Moon, Sun, RefreshCw, Bell, LogIn, LogOut, ShieldCheck } from "lucide-react";
 import logo from "@/assets/logo-rt.png";
 import { useTheme } from "@/lib/theme-context";
 import { useAuth } from "@/lib/auth-context";
-import { navItems } from "./nav-config";
+import { navFor } from "./nav-config";
 import { cn } from "@/lib/utils";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [openMobile, setOpenMobile] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { theme, toggle } = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const role = user?.role;
 
   useEffect(() => setOpenMobile(false), [pathname]);
@@ -19,7 +19,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="app-bg min-h-screen flex w-full text-foreground">
       {/* Sidebar - desktop */}
-      <aside className="hidden lg:flex flex-col w-64 shrink-0 border-r border-sidebar-border bg-sidebar/80 backdrop-blur-xl sticky top-0 h-screen">
+      <aside className="hidden lg:flex flex-col w-64 shrink-0 border-r border-sidebar-border bg-sidebar/80 backdrop-blur-xl sticky top-0 h-screen max-w-[80vw]">
         <SidebarInner pathname={pathname} role={role} />
       </aside>
 
@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {openMobile && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setOpenMobile(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-sidebar border-r border-sidebar-border flex flex-col">
+          <aside className="absolute left-0 top-0 bottom-0 w-[82vw] max-w-[320px] bg-sidebar border-r border-sidebar-border flex flex-col">
             <SidebarInner pathname={pathname} role={role} />
           </aside>
         </div>
@@ -55,10 +55,19 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="flex-1" />
 
             {user ? (
-              <Link to="/login" title={`${user.nama} · ${user.role}`} className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl glass text-xs font-semibold">
-                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                <span className="max-w-[120px] truncate">{user.nama}</span>
-              </Link>
+              <>
+                <Link to="/login" title={`${user.nama} · ${user.role}`} className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl glass text-xs font-semibold">
+                  <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                  <span className="max-w-[120px] truncate">{user.nama}</span>
+                </Link>
+                <button
+                  onClick={() => { void logout(); }}
+                  className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-destructive/10 text-destructive text-xs font-semibold"
+                  title="Logout"
+                >
+                  <LogOut className="h-3.5 w-3.5" /> Logout
+                </button>
+              </>
             ) : (
               <Link to="/login" className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold shadow-glow">
                 <LogIn className="h-3.5 w-3.5" /> Login
@@ -89,14 +98,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 px-3 sm:px-5 py-4 sm:py-6 pb-28">{children}</main>
+        <main className="flex-1 min-w-0 px-3 sm:px-5 py-4 sm:py-6 pb-32">{children}</main>
       </div>
     </div>
   );
 }
 
 function SidebarInner({ pathname, role }: { pathname: string; role?: string }) {
-  const items = navItems.filter((it) => !it.roles || (role && it.roles.includes(role as never)));
+  const items = navFor(role as never);
   return (
     <>
       <div className="p-5 border-b border-sidebar-border">
