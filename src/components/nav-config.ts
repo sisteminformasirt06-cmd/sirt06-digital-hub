@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, FileText, Wallet, Boxes, ShieldCheck,
   ClipboardCheck, QrCode, Store, MessageSquareWarning, Siren,
-  Newspaper, MessageCircle, Settings, Crown,
+  Newspaper, MessageCircle, Settings, Crown, CalendarDays,
 } from "lucide-react";
 import type { Role } from "@/lib/auth-context";
 
@@ -14,6 +14,7 @@ export interface NavItem {
 
 export const navItems: readonly NavItem[] = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/agenda", label: "Agenda", icon: CalendarDays },
   { to: "/warga", label: "Data Warga", icon: Users },
   { to: "/administrasi", label: "Administrasi", icon: FileText },
   { to: "/keuangan", label: "Keuangan", icon: Wallet },
