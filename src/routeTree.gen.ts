@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhatsappRouteImport } from './routes/whatsapp'
 import { Route as WargaRouteImport } from './routes/warga'
 import { Route as UmkmRouteImport } from './routes/umkm'
+import { Route as TentangRtRouteImport } from './routes/tentang-rt'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SupabasePanelRouteImport } from './routes/supabase-panel'
 import { Route as QrCenterRouteImport } from './routes/qr-center'
@@ -49,6 +50,11 @@ const WargaRoute = WargaRouteImport.update({
 const UmkmRoute = UmkmRouteImport.update({
   id: '/umkm',
   path: '/umkm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TentangRtRoute = TentangRtRouteImport.update({
+  id: '/tentang-rt',
+  path: '/tentang-rt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SuperAdminRoute = SuperAdminRouteImport.update({
@@ -191,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/qr-center': typeof QrCenterRoute
   '/supabase-panel': typeof SupabasePanelRoute
   '/super-admin': typeof SuperAdminRoute
+  '/tentang-rt': typeof TentangRtRoute
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
   '/whatsapp': typeof WhatsappRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByTo {
   '/qr-center': typeof QrCenterRoute
   '/supabase-panel': typeof SupabasePanelRoute
   '/super-admin': typeof SuperAdminRoute
+  '/tentang-rt': typeof TentangRtRoute
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
   '/whatsapp': typeof WhatsappRoute
@@ -248,6 +256,7 @@ export interface FileRoutesById {
   '/qr-center': typeof QrCenterRoute
   '/supabase-panel': typeof SupabasePanelRoute
   '/super-admin': typeof SuperAdminRoute
+  '/tentang-rt': typeof TentangRtRoute
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
   '/whatsapp': typeof WhatsappRoute
@@ -278,6 +287,7 @@ export interface FileRouteTypes {
     | '/qr-center'
     | '/supabase-panel'
     | '/super-admin'
+    | '/tentang-rt'
     | '/umkm'
     | '/warga'
     | '/whatsapp'
@@ -306,6 +316,7 @@ export interface FileRouteTypes {
     | '/qr-center'
     | '/supabase-panel'
     | '/super-admin'
+    | '/tentang-rt'
     | '/umkm'
     | '/warga'
     | '/whatsapp'
@@ -334,6 +345,7 @@ export interface FileRouteTypes {
     | '/qr-center'
     | '/supabase-panel'
     | '/super-admin'
+    | '/tentang-rt'
     | '/umkm'
     | '/warga'
     | '/whatsapp'
@@ -363,6 +375,7 @@ export interface RootRouteChildren {
   QrCenterRoute: typeof QrCenterRoute
   SupabasePanelRoute: typeof SupabasePanelRoute
   SuperAdminRoute: typeof SuperAdminRoute
+  TentangRtRoute: typeof TentangRtRoute
   UmkmRoute: typeof UmkmRoute
   WargaRoute: typeof WargaRoute
   WhatsappRoute: typeof WhatsappRoute
@@ -389,6 +402,13 @@ declare module '@tanstack/react-router' {
       path: '/umkm'
       fullPath: '/umkm'
       preLoaderRoute: typeof UmkmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tentang-rt': {
+      id: '/tentang-rt'
+      path: '/tentang-rt'
+      fullPath: '/tentang-rt'
+      preLoaderRoute: typeof TentangRtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/super-admin': {
@@ -579,6 +599,7 @@ const rootRouteChildren: RootRouteChildren = {
   QrCenterRoute: QrCenterRoute,
   SupabasePanelRoute: SupabasePanelRoute,
   SuperAdminRoute: SuperAdminRoute,
+  TentangRtRoute: TentangRtRoute,
   UmkmRoute: UmkmRoute,
   WargaRoute: WargaRoute,
   WhatsappRoute: WhatsappRoute,
