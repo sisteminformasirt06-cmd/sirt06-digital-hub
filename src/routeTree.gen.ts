@@ -20,6 +20,7 @@ import { Route as QrCenterRouteImport } from './routes/qr-center'
 import { Route as PoskamlingRouteImport } from './routes/poskamling'
 import { Route as PengaturanRouteImport } from './routes/pengaturan'
 import { Route as MediaRouteImport } from './routes/media'
+import { Route as ManajemenPinRouteImport } from './routes/manajemen-pin'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LaporanRouteImport } from './routes/laporan'
 import { Route as KritikSaranRouteImport } from './routes/kritik-saran'
@@ -91,6 +92,11 @@ const PengaturanRoute = PengaturanRouteImport.update({
 const MediaRoute = MediaRouteImport.update({
   id: '/media',
   path: '/media',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManajemenPinRoute = ManajemenPinRouteImport.update({
+  id: '/manajemen-pin',
+  path: '/manajemen-pin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/kritik-saran': typeof KritikSaranRoute
   '/laporan': typeof LaporanRoute
   '/login': typeof LoginRoute
+  '/manajemen-pin': typeof ManajemenPinRoute
   '/media': typeof MediaRoute
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
   '/kritik-saran': typeof KritikSaranRoute
   '/laporan': typeof LaporanRoute
   '/login': typeof LoginRoute
+  '/manajemen-pin': typeof ManajemenPinRoute
   '/media': typeof MediaRoute
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
@@ -258,6 +266,7 @@ export interface FileRoutesById {
   '/kritik-saran': typeof KritikSaranRoute
   '/laporan': typeof LaporanRoute
   '/login': typeof LoginRoute
+  '/manajemen-pin': typeof ManajemenPinRoute
   '/media': typeof MediaRoute
   '/pengaturan': typeof PengaturanRoute
   '/poskamling': typeof PoskamlingRoute
@@ -290,6 +299,7 @@ export interface FileRouteTypes {
     | '/kritik-saran'
     | '/laporan'
     | '/login'
+    | '/manajemen-pin'
     | '/media'
     | '/pengaturan'
     | '/poskamling'
@@ -320,6 +330,7 @@ export interface FileRouteTypes {
     | '/kritik-saran'
     | '/laporan'
     | '/login'
+    | '/manajemen-pin'
     | '/media'
     | '/pengaturan'
     | '/poskamling'
@@ -350,6 +361,7 @@ export interface FileRouteTypes {
     | '/kritik-saran'
     | '/laporan'
     | '/login'
+    | '/manajemen-pin'
     | '/media'
     | '/pengaturan'
     | '/poskamling'
@@ -381,6 +393,7 @@ export interface RootRouteChildren {
   KritikSaranRoute: typeof KritikSaranRoute
   LaporanRoute: typeof LaporanRoute
   LoginRoute: typeof LoginRoute
+  ManajemenPinRoute: typeof ManajemenPinRoute
   MediaRoute: typeof MediaRoute
   PengaturanRoute: typeof PengaturanRoute
   PoskamlingRoute: typeof PoskamlingRoute
@@ -471,6 +484,13 @@ declare module '@tanstack/react-router' {
       path: '/media'
       fullPath: '/media'
       preLoaderRoute: typeof MediaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manajemen-pin': {
+      id: '/manajemen-pin'
+      path: '/manajemen-pin'
+      fullPath: '/manajemen-pin'
+      preLoaderRoute: typeof ManajemenPinRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -613,6 +633,7 @@ const rootRouteChildren: RootRouteChildren = {
   KritikSaranRoute: KritikSaranRoute,
   LaporanRoute: LaporanRoute,
   LoginRoute: LoginRoute,
+  ManajemenPinRoute: ManajemenPinRoute,
   MediaRoute: MediaRoute,
   PengaturanRoute: PengaturanRoute,
   PoskamlingRoute: PoskamlingRoute,
