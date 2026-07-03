@@ -34,6 +34,7 @@ import { Route as InventarisRouteImport } from './routes/inventaris'
 import { Route as GoogleDriveRouteImport } from './routes/google-drive'
 import { Route as GantiPinRouteImport } from './routes/ganti-pin'
 import { Route as EmergencyRouteImport } from './routes/emergency'
+import { Route as AuditLogRouteImport } from './routes/audit-log'
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AdministrasiRouteImport } from './routes/administrasi'
 import { Route as AbsensiRouteImport } from './routes/absensi'
@@ -164,6 +165,11 @@ const EmergencyRoute = EmergencyRouteImport.update({
   path: '/emergency',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuditLogRoute = AuditLogRouteImport.update({
+  id: '/audit-log',
+  path: '/audit-log',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AgendaRoute = AgendaRouteImport.update({
   id: '/agenda',
   path: '/agenda',
@@ -190,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/absensi': typeof AbsensiRoute
   '/administrasi': typeof AdministrasiRoute
   '/agenda': typeof AgendaRoute
+  '/audit-log': typeof AuditLogRoute
   '/emergency': typeof EmergencyRoute
   '/ganti-pin': typeof GantiPinRoute
   '/google-drive': typeof GoogleDriveRoute
@@ -221,6 +228,7 @@ export interface FileRoutesByTo {
   '/absensi': typeof AbsensiRoute
   '/administrasi': typeof AdministrasiRoute
   '/agenda': typeof AgendaRoute
+  '/audit-log': typeof AuditLogRoute
   '/emergency': typeof EmergencyRoute
   '/ganti-pin': typeof GantiPinRoute
   '/google-drive': typeof GoogleDriveRoute
@@ -253,6 +261,7 @@ export interface FileRoutesById {
   '/absensi': typeof AbsensiRoute
   '/administrasi': typeof AdministrasiRoute
   '/agenda': typeof AgendaRoute
+  '/audit-log': typeof AuditLogRoute
   '/emergency': typeof EmergencyRoute
   '/ganti-pin': typeof GantiPinRoute
   '/google-drive': typeof GoogleDriveRoute
@@ -286,6 +295,7 @@ export interface FileRouteTypes {
     | '/absensi'
     | '/administrasi'
     | '/agenda'
+    | '/audit-log'
     | '/emergency'
     | '/ganti-pin'
     | '/google-drive'
@@ -317,6 +327,7 @@ export interface FileRouteTypes {
     | '/absensi'
     | '/administrasi'
     | '/agenda'
+    | '/audit-log'
     | '/emergency'
     | '/ganti-pin'
     | '/google-drive'
@@ -348,6 +359,7 @@ export interface FileRouteTypes {
     | '/absensi'
     | '/administrasi'
     | '/agenda'
+    | '/audit-log'
     | '/emergency'
     | '/ganti-pin'
     | '/google-drive'
@@ -380,6 +392,7 @@ export interface RootRouteChildren {
   AbsensiRoute: typeof AbsensiRoute
   AdministrasiRoute: typeof AdministrasiRoute
   AgendaRoute: typeof AgendaRoute
+  AuditLogRoute: typeof AuditLogRoute
   EmergencyRoute: typeof EmergencyRoute
   GantiPinRoute: typeof GantiPinRoute
   GoogleDriveRoute: typeof GoogleDriveRoute
@@ -584,6 +597,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmergencyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/audit-log': {
+      id: '/audit-log'
+      path: '/audit-log'
+      fullPath: '/audit-log'
+      preLoaderRoute: typeof AuditLogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/agenda': {
       id: '/agenda'
       path: '/agenda'
@@ -620,6 +640,7 @@ const rootRouteChildren: RootRouteChildren = {
   AbsensiRoute: AbsensiRoute,
   AdministrasiRoute: AdministrasiRoute,
   AgendaRoute: AgendaRoute,
+  AuditLogRoute: AuditLogRoute,
   EmergencyRoute: EmergencyRoute,
   GantiPinRoute: GantiPinRoute,
   GoogleDriveRoute: GoogleDriveRoute,
