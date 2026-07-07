@@ -14,6 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
+      anggota_keluarga: {
+        Row: {
+          agama: string | null
+          created_at: string
+          foto_url: string | null
+          id: string
+          jenis_kelamin: string
+          kk_id: string
+          nama: string
+          nik: string
+          no_hp: string | null
+          pekerjaan: string | null
+          pendidikan: string | null
+          status_keluarga: string | null
+          status_perkawinan: string | null
+          status_warga: string
+          tanggal_lahir: string | null
+          tempat_lahir: string | null
+          updated_at: string
+        }
+        Insert: {
+          agama?: string | null
+          created_at?: string
+          foto_url?: string | null
+          id?: string
+          jenis_kelamin: string
+          kk_id: string
+          nama: string
+          nik: string
+          no_hp?: string | null
+          pekerjaan?: string | null
+          pendidikan?: string | null
+          status_keluarga?: string | null
+          status_perkawinan?: string | null
+          status_warga?: string
+          tanggal_lahir?: string | null
+          tempat_lahir?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agama?: string | null
+          created_at?: string
+          foto_url?: string | null
+          id?: string
+          jenis_kelamin?: string
+          kk_id?: string
+          nama?: string
+          nik?: string
+          no_hp?: string | null
+          pekerjaan?: string | null
+          pendidikan?: string | null
+          status_keluarga?: string | null
+          status_perkawinan?: string | null
+          status_warga?: string
+          tanggal_lahir?: string | null
+          tempat_lahir?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anggota_keluarga_kk_id_fkey"
+            columns: ["kk_id"]
+            isOneToOne: false
+            referencedRelation: "kartu_keluarga"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           aksi: string
@@ -57,6 +125,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      kartu_keluarga: {
+        Row: {
+          alamat: string
+          created_at: string
+          foto_kk_url: string | null
+          id: string
+          kepala_keluarga: string
+          no_wa: string | null
+          nomor_kk: string
+          rt: string | null
+          rw: string | null
+          status_kk: string
+          updated_at: string
+        }
+        Insert: {
+          alamat: string
+          created_at?: string
+          foto_kk_url?: string | null
+          id?: string
+          kepala_keluarga: string
+          no_wa?: string | null
+          nomor_kk: string
+          rt?: string | null
+          rw?: string | null
+          status_kk?: string
+          updated_at?: string
+        }
+        Update: {
+          alamat?: string
+          created_at?: string
+          foto_kk_url?: string | null
+          id?: string
+          kepala_keluarga?: string
+          no_wa?: string | null
+          nomor_kk?: string
+          rt?: string | null
+          rw?: string | null
+          status_kk?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       pengurus: {
         Row: {
