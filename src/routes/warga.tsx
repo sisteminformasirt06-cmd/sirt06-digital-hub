@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { Users, Plus, Trash2, Search, LogIn, LogOut as LogOutIcon, X, Home, UserPlus, Filter } from "lucide-react";
-import { useLS, uid, nowISO, tanggal } from "@/lib/storage";
-import { useAuth } from "@/lib/auth-context";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Users, Plus, Trash2, Search, X, Home, UserPlus, Filter, Pencil, Eye, Loader2, Image as ImageIcon } from "lucide-react";
+import { tanggal } from "@/lib/storage";
+import { useAuth, type Role } from "@/lib/auth-context";
+import { supabase } from "@/integrations/supabase/client";
 import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/warga")({
@@ -15,83 +16,209 @@ export const Route = createFileRoute("/warga")({
   component: WargaPage,
 });
 
-type StatusWarga = "Tetap" | "Kontrak" | "Kos" | "Pindah" | "Meninggal";
+const BUCKET = "warga-photos";
+const STATUS_WARGA = ["Warga Tetap", "Warga Domisili", "Warga Kontrak/Sewa"] as const;
+type StatusWarga = (typeof STATUS_WARGA)[number];
+const JK_LIST = ["Laki-laki", "Perempuan"] as const;
+type JK = (typeof JK_LIST)[number];
+const AGAMA_LIST = ["Islam", "Kristen", "Katolik", "Hindu", "Buddha", "Konghucu", "Lainnya"];
+const PENDIDIKAN_LIST = ["Belum Sekolah", "SD", "SMP", "SMA/SMK", "D1/D2/D3", "S1", "S2", "S3"];
+const STATUS_KELUARGA_LIST = ["Kepala Keluarga", "Istri", "Anak", "Orang Tua", "Famili Lain", "Lainnya"];
+const STATUS_PERKAWINAN_LIST = ["Belum Kawin", "Kawin", "Cerai Hidup", "Cerai Mati"];
 
 interface KK {
   id: string;
-  nomorKK: string;
-  kepala: string;
+  nomor_kk: string;
+  kepala_keluarga: string;
   alamat: string;
-  createdAt: string;
+  no_wa: string | null;
+  rt: string | null;
+  rw: string | null;
+  status_kk: "Aktif" | "Pindah";
+  foto_kk_url: string | null;
 }
 
-interface Warga {
+interface Anggota {
   id: string;
-  kkId: string;
+  kk_id: string;
   nik: string;
   nama: string;
-  jk: "L" | "P";
-  tanggalLahir: string;
-  status: StatusWarga;
-  pekerjaan?: string;
-  noHp?: string;
-  createdAt: string;
+  jenis_kelamin: JK;
+  tempat_lahir: string | null;
+  tanggal_lahir: string | null;
+  agama: string | null;
+  pendidikan: string | null;
+  pekerjaan: string | null;
+  status_keluarga: string | null;
+  status_perkawinan: string | null;
+  status_warga: StatusWarga;
+  no_hp: string | null;
+  foto_url: string | null;
 }
 
-type MutasiTipe = "Masuk" | "Keluar";
-interface Mutasi {
-  id: string;
-  tipe: MutasiTipe;
-  nama: string;
-  tanggal: string;
-  keterangan?: string;
-  petugas: string;
-  waktu: string;
+type Tab = "warga" | "kk";
+
+function canManage(role?: Role | null) {
+  return role === "Admin" || role === "Bendahara" || role === "Super Admin";
+}
+function canDelete(role?: Role | null) {
+  return role === "Super Admin";
 }
 
-type Tab = "kk" | "warga" | "mutasi";
+async function uploadFoto(file: File, prefix: string): Promise<string> {
+  const ext = file.name.split(".").pop() || "jpg";
+  const path = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: false });
+  if (error) throw error;
+  return path;
+}
+
+function useSignedUrl(path: string | null | undefined) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    if (!path) { setUrl(null); return; }
+    supabase.storage.from(BUCKET).createSignedUrl(path, 3600).then(({ data }) => {
+      if (alive) setUrl(data?.signedUrl ?? null);
+    });
+    return () => { alive = false; };
+  }, [path]);
+  return url;
+}
 
 function WargaPage() {
   const { user, logAction } = useAuth();
-  const [kks, setKks] = useLS<KK[]>("sirt06_kk_v1", []);
-  const [warga, setWarga] = useLS<Warga[]>("sirt06_warga_v1", []);
-  const [mutasi, setMutasi] = useLS<Mutasi[]>("sirt06_mutasi_v1", []);
   const [tab, setTab] = useState<Tab>("warga");
+  const [kks, setKks] = useState<KK[]>([]);
+  const [anggota, setAnggota] = useState<Anggota[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
+
   const [q, setQ] = useState("");
-  const [filterStatus, setFilterStatus] = useState<StatusWarga | "Semua">("Semua");
+  const [fStatus, setFStatus] = useState<StatusWarga | "Semua">("Semua");
+  const [fJK, setFJK] = useState<JK | "Semua">("Semua");
+  const [fRT, setFRT] = useState("");
+  const [fRW, setFRW] = useState("");
+
+  const [editKK, setEditKK] = useState<KK | null>(null);
   const [showKK, setShowKK] = useState(false);
-  const [showWarga, setShowWarga] = useState(false);
-  const [showMutasi, setShowMutasi] = useState<MutasiTipe | null>(null);
+  const [editAng, setEditAng] = useState<Anggota | null>(null);
+  const [showAng, setShowAng] = useState(false);
+  const [detailAng, setDetailAng] = useState<Anggota | null>(null);
+  const [detailKK, setDetailKK] = useState<KK | null>(null);
 
-  const canManage = !!user && ["Ketua RT", "Sekretaris", "Admin"].includes(user.role);
+  const load = useCallback(async () => {
+    setLoading(true); setErr(null);
+    try {
+      const [kkRes, angRes] = await Promise.all([
+        supabase.from("kartu_keluarga").select("*").order("created_at", { ascending: false }),
+        supabase.from("anggota_keluarga").select("*").order("created_at", { ascending: false }),
+      ]);
+      if (kkRes.error) throw kkRes.error;
+      if (angRes.error) throw angRes.error;
+      setKks((kkRes.data ?? []) as KK[]);
+      setAnggota((angRes.data ?? []) as Anggota[]);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Gagal memuat data");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const wargaFiltered = useMemo(() => {
-    return warga.filter((w) => {
-      const matchQ = !q || [w.nama, w.nik, w.pekerjaan, w.noHp].filter(Boolean).join(" ").toLowerCase().includes(q.toLowerCase());
-      const matchS = filterStatus === "Semua" || w.status === filterStatus;
-      return matchQ && matchS;
+  useEffect(() => { load(); }, [load]);
+
+  const rtList = useMemo(() => Array.from(new Set(kks.map((k) => k.rt).filter(Boolean) as string[])).sort(), [kks]);
+  const rwList = useMemo(() => Array.from(new Set(kks.map((k) => k.rw).filter(Boolean) as string[])).sort(), [kks]);
+
+  const anggotaFiltered = useMemo(() => {
+    return anggota.filter((a) => {
+      const kk = kks.find((k) => k.id === a.kk_id);
+      const qMatch = !q || [a.nama, a.nik, kk?.nomor_kk].filter(Boolean).join(" ").toLowerCase().includes(q.toLowerCase());
+      const sMatch = fStatus === "Semua" || a.status_warga === fStatus;
+      const jMatch = fJK === "Semua" || a.jenis_kelamin === fJK;
+      const rtMatch = !fRT || kk?.rt === fRT;
+      const rwMatch = !fRW || kk?.rw === fRW;
+      return qMatch && sMatch && jMatch && rtMatch && rwMatch;
     });
-  }, [warga, q, filterStatus]);
+  }, [anggota, kks, q, fStatus, fJK, fRT, fRW]);
+
+  const kkFiltered = useMemo(() => {
+    return kks.filter((k) => {
+      const qMatch = !q || [k.nomor_kk, k.kepala_keluarga, k.alamat].join(" ").toLowerCase().includes(q.toLowerCase());
+      const rtMatch = !fRT || k.rt === fRT;
+      const rwMatch = !fRW || k.rw === fRW;
+      return qMatch && rtMatch && rwMatch;
+    });
+  }, [kks, q, fRT, fRW]);
 
   const stats = useMemo(() => ({
-    total: warga.length,
+    total: anggota.length,
     kk: kks.length,
-    tetap: warga.filter((w) => w.status === "Tetap").length,
-    kontrak: warga.filter((w) => w.status === "Kontrak").length,
-    kos: warga.filter((w) => w.status === "Kos").length,
-    pindah: warga.filter((w) => w.status === "Pindah").length,
-  }), [warga, kks]);
+    tetap: anggota.filter((a) => a.status_warga === "Warga Tetap").length,
+    domisili: anggota.filter((a) => a.status_warga === "Warga Domisili").length,
+    kontrak: anggota.filter((a) => a.status_warga === "Warga Kontrak/Sewa").length,
+    lk: anggota.filter((a) => a.jenis_kelamin === "Laki-laki").length,
+  }), [anggota, kks]);
 
   if (!user) return <LoginRequired modul="Data Warga" />;
 
+  const manage = canManage(user.role);
+  const del = canDelete(user.role);
+
+  const saveKK = async (data: Omit<KK, "id">, fotoFile: File | null) => {
+    let foto_kk_url = data.foto_kk_url;
+    if (fotoFile) foto_kk_url = await uploadFoto(fotoFile, "kk");
+    if (editKK) {
+      const { error } = await supabase.from("kartu_keluarga").update({ ...data, foto_kk_url }).eq("id", editKK.id);
+      if (error) throw error;
+      logAction("Edit KK", "Data Warga", data.nomor_kk);
+    } else {
+      const { error } = await supabase.from("kartu_keluarga").insert({ ...data, foto_kk_url });
+      if (error) throw error;
+      logAction("Tambah KK", "Data Warga", data.nomor_kk);
+    }
+    setShowKK(false); setEditKK(null); await load();
+  };
+
+  const removeKK = async (kk: KK) => {
+    if (!confirm(`Hapus KK ${kk.nomor_kk}? Semua anggota keluarga ikut terhapus.`)) return;
+    const { error } = await supabase.from("kartu_keluarga").delete().eq("id", kk.id);
+    if (error) { alert(error.message); return; }
+    logAction("Hapus KK", "Data Warga", kk.nomor_kk);
+    await load();
+  };
+
+  const saveAng = async (data: Omit<Anggota, "id">, fotoFile: File | null) => {
+    let foto_url = data.foto_url;
+    if (fotoFile) foto_url = await uploadFoto(fotoFile, "warga");
+    if (editAng) {
+      const { error } = await supabase.from("anggota_keluarga").update({ ...data, foto_url }).eq("id", editAng.id);
+      if (error) throw error;
+      logAction("Edit Warga", "Data Warga", data.nama);
+    } else {
+      const { error } = await supabase.from("anggota_keluarga").insert({ ...data, foto_url });
+      if (error) throw error;
+      logAction("Tambah Warga", "Data Warga", data.nama);
+    }
+    setShowAng(false); setEditAng(null); await load();
+  };
+
+  const removeAng = async (a: Anggota) => {
+    if (!confirm(`Hapus data ${a.nama}?`)) return;
+    const { error } = await supabase.from("anggota_keluarga").delete().eq("id", a.id);
+    if (error) { alert(error.message); return; }
+    logAction("Hapus Warga", "Data Warga", a.nama);
+    await load();
+  };
+
   return (
     <div className="space-y-4 max-w-6xl mx-auto">
-      <PageHeader title="Data Warga" desc="Kelola KK, anggota warga, dan mutasi RT 06" icon={Users} />
+      <PageHeader title="Data Warga" desc="Kelola KK dan anggota warga RT 06" icon={Users} />
 
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
         {[
-          ["Total", stats.total], ["KK", stats.kk], ["Tetap", stats.tetap],
-          ["Kontrak", stats.kontrak], ["Kos", stats.kos], ["Pindah", stats.pindah],
+          ["Warga", stats.total], ["KK", stats.kk], ["Tetap", stats.tetap],
+          ["Domisili", stats.domisili], ["Kontrak", stats.kontrak], ["L / P", `${stats.lk}/${stats.total - stats.lk}`],
         ].map(([l, v]) => (
           <div key={String(l)} className="glass rounded-2xl p-3 text-center">
             <div className="text-[10px] text-muted-foreground uppercase tracking-wide">{l}</div>
@@ -101,175 +228,332 @@ function WargaPage() {
       </div>
 
       <div className="flex flex-wrap gap-1.5">
-        {(["warga", "kk", "mutasi"] as Tab[]).map((t) => (
+        {(["warga", "kk"] as Tab[]).map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`px-3 py-1.5 rounded-xl text-xs font-semibold ${tab === t ? "gradient-primary text-primary-foreground shadow-glow" : "glass"}`}>
-            {t === "warga" ? "Data Warga" : t === "kk" ? "Kartu Keluarga" : "Mutasi"}
+            {t === "warga" ? "Anggota Warga" : "Kartu Keluarga"}
           </button>
         ))}
       </div>
 
-      {tab === "warga" && (
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative flex-1 min-w-[180px]">
-              <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari nama, NIK, HP…" className="w-full pl-9 pr-3 py-2 rounded-xl bg-input border border-border text-sm" />
-            </div>
-            <div className="flex items-center gap-1.5 glass rounded-xl px-2 py-1.5 text-xs">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[180px]">
+          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari nama, NIK, No. KK…" className="w-full pl-9 pr-3 py-2 rounded-xl bg-input border border-border text-sm" />
+        </div>
+        {tab === "warga" && (
+          <>
+            <FilterBox>
               <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-              <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as StatusWarga | "Semua")} className="bg-transparent outline-none">
-                {(["Semua", "Tetap", "Kontrak", "Kos", "Pindah", "Meninggal"] as const).map((s) => <option key={s}>{s}</option>)}
+              <select value={fStatus} onChange={(e) => setFStatus(e.target.value as StatusWarga | "Semua")} className="bg-transparent outline-none">
+                <option>Semua</option>
+                {STATUS_WARGA.map((s) => <option key={s}>{s}</option>)}
               </select>
-            </div>
-            {canManage && (
-              <button onClick={() => setShowWarga(true)} className="ml-auto inline-flex items-center gap-1.5 px-3 py-2 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold shadow-glow">
-                <UserPlus className="h-4 w-4" /> Tambah Warga
-              </button>
-            )}
-          </div>
-          <DataTable
-            headers={["Nama", "NIK", "JK", "Status", "KK", "HP", ""]}
-            rows={wargaFiltered.map((w) => {
-              const kk = kks.find((k) => k.id === w.kkId);
-              return [w.nama, w.nik, w.jk, <StatusBadge key={w.id} status={w.status} />, kk?.nomorKK ?? "-", w.noHp ?? "-",
-                canManage ? <button onClick={() => { setWarga((p) => p.filter((x) => x.id !== w.id)); logAction("Hapus warga", "Warga", w.nama); }} className="text-destructive p-1 hover:bg-destructive/10 rounded"><Trash2 className="h-3.5 w-3.5" /></button> : null,
-              ];
-            })}
-            empty="Belum ada data warga"
-          />
+            </FilterBox>
+            <FilterBox>
+              <select value={fJK} onChange={(e) => setFJK(e.target.value as JK | "Semua")} className="bg-transparent outline-none">
+                <option>Semua</option>
+                {JK_LIST.map((j) => <option key={j}>{j}</option>)}
+              </select>
+            </FilterBox>
+          </>
+        )}
+        <FilterBox>
+          <select value={fRT} onChange={(e) => setFRT(e.target.value)} className="bg-transparent outline-none">
+            <option value="">RT semua</option>
+            {rtList.map((r) => <option key={r} value={r}>RT {r}</option>)}
+          </select>
+        </FilterBox>
+        <FilterBox>
+          <select value={fRW} onChange={(e) => setFRW(e.target.value)} className="bg-transparent outline-none">
+            <option value="">RW semua</option>
+            {rwList.map((r) => <option key={r} value={r}>RW {r}</option>)}
+          </select>
+        </FilterBox>
+        {manage && (
+          <button
+            onClick={() => { if (tab === "warga") { setEditAng(null); setShowAng(true); } else { setEditKK(null); setShowKK(true); } }}
+            className="ml-auto inline-flex items-center gap-1.5 px-3 py-2 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold shadow-glow"
+          >
+            {tab === "warga" ? <><UserPlus className="h-4 w-4" /> Tambah Warga</> : <><Plus className="h-4 w-4" /> Tambah KK</>}
+          </button>
+        )}
+      </div>
+
+      {err && <div className="glass rounded-2xl p-3 text-xs text-destructive">{err}</div>}
+      {loading ? (
+        <div className="glass rounded-2xl p-8 text-center flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" /> Memuat data…
         </div>
+      ) : tab === "warga" ? (
+        <DataTable
+          headers={["Nama", "NIK", "JK", "Status Warga", "No. KK", "HP", ""]}
+          rows={anggotaFiltered.map((a) => {
+            const kk = kks.find((k) => k.id === a.kk_id);
+            return [
+              a.nama, a.nik, a.jenis_kelamin === "Laki-laki" ? "L" : "P",
+              <StatusBadge key={a.id} status={a.status_warga} />,
+              kk?.nomor_kk ?? "-", a.no_hp ?? "-",
+              <RowActions key={a.id}
+                onView={() => setDetailAng(a)}
+                onEdit={manage ? () => { setEditAng(a); setShowAng(true); } : undefined}
+                onDelete={del ? () => removeAng(a) : undefined}
+              />,
+            ];
+          })}
+          empty="Belum ada data warga."
+        />
+      ) : (
+        <DataTable
+          headers={["No. KK", "Kepala Keluarga", "Alamat", "RT/RW", "Anggota", "Status", ""]}
+          rows={kkFiltered.map((k) => [
+            k.nomor_kk, k.kepala_keluarga, k.alamat,
+            `${k.rt ?? "-"}/${k.rw ?? "-"}`,
+            anggota.filter((a) => a.kk_id === k.id).length,
+            <span key={k.id} className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${k.status_kk === "Aktif" ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>{k.status_kk}</span>,
+            <RowActions key={k.id}
+              onView={() => setDetailKK(k)}
+              onEdit={manage ? () => { setEditKK(k); setShowKK(true); } : undefined}
+              onDelete={del ? () => removeKK(k) : undefined}
+            />,
+          ])}
+          empty="Belum ada data warga."
+        />
       )}
 
-      {tab === "kk" && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-semibold">{kks.length} Kartu Keluarga</div>
-            {canManage && (
-              <button onClick={() => setShowKK(true)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl gradient-primary text-primary-foreground text-xs font-semibold shadow-glow">
-                <Plus className="h-4 w-4" /> Tambah KK
-              </button>
-            )}
-          </div>
-          <DataTable
-            headers={["No. KK", "Kepala Keluarga", "Alamat", "Anggota", ""]}
-            rows={kks.map((k) => [
-              k.nomorKK, k.kepala, k.alamat,
-              warga.filter((w) => w.kkId === k.id).length,
-              canManage ? <button onClick={() => { setKks((p) => p.filter((x) => x.id !== k.id)); logAction("Hapus KK", "Warga", k.nomorKK); }} className="text-destructive p-1 hover:bg-destructive/10 rounded"><Trash2 className="h-3.5 w-3.5" /></button> : null,
-            ])}
-            empty="Belum ada data KK"
-          />
-        </div>
-      )}
-
-      {tab === "mutasi" && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="text-sm font-semibold flex-1">{mutasi.length} Mutasi tercatat</div>
-            {canManage && (
-              <>
-                <button onClick={() => setShowMutasi("Masuk")} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-success text-white text-xs font-semibold"><LogIn className="h-3.5 w-3.5" /> Masuk</button>
-                <button onClick={() => setShowMutasi("Keluar")} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-warning text-white text-xs font-semibold"><LogOutIcon className="h-3.5 w-3.5" /> Keluar</button>
-              </>
-            )}
-          </div>
-          <DataTable
-            headers={["Tipe", "Nama", "Tanggal", "Keterangan", "Petugas"]}
-            rows={mutasi.map((m) => [
-              <span key={m.id} className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${m.tipe === "Masuk" ? "bg-success/15 text-success" : "bg-warning/20 text-warning"}`}>{m.tipe}</span>,
-              m.nama, tanggal(m.tanggal), m.keterangan ?? "-", m.petugas,
-            ])}
-            empty="Belum ada mutasi"
-          />
-        </div>
-      )}
-
-      {showKK && canManage && (
-        <Modal title="Tambah KK" onClose={() => setShowKK(false)}>
-          <KKForm onSubmit={(data) => { setKks((p) => [{ ...data, id: uid("kk"), createdAt: nowISO() }, ...p]); logAction("Tambah KK", "Warga", data.nomorKK); setShowKK(false); }} />
+      {showKK && (
+        <Modal title={editKK ? "Edit KK" : "Tambah KK"} onClose={() => { setShowKK(false); setEditKK(null); }}>
+          <KKForm initial={editKK} onSubmit={saveKK} />
         </Modal>
       )}
-      {showWarga && canManage && (
-        <Modal title="Tambah Warga" onClose={() => setShowWarga(false)}>
-          <WargaForm kks={kks} onSubmit={(data) => { setWarga((p) => [{ ...data, id: uid("w"), createdAt: nowISO() }, ...p]); logAction("Tambah warga", "Warga", data.nama); setShowWarga(false); }} />
+      {showAng && (
+        <Modal title={editAng ? "Edit Anggota" : "Tambah Anggota"} onClose={() => { setShowAng(false); setEditAng(null); }}>
+          <AnggotaForm kks={kks} anggotaAll={anggota} initial={editAng} onSubmit={saveAng} />
         </Modal>
       )}
-      {showMutasi && canManage && (
-        <Modal title={`Mutasi ${showMutasi}`} onClose={() => setShowMutasi(null)}>
-          <MutasiForm tipe={showMutasi} onSubmit={(data) => { setMutasi((p) => [{ ...data, id: uid("mt"), waktu: nowISO(), petugas: user.nama }, ...p]); logAction(`Mutasi ${showMutasi}`, "Warga", data.nama); setShowMutasi(null); }} />
+      {detailAng && (
+        <Modal title="Detail Warga" onClose={() => setDetailAng(null)}>
+          <AnggotaDetail a={detailAng} kk={kks.find((k) => k.id === detailAng.kk_id) ?? null} />
+        </Modal>
+      )}
+      {detailKK && (
+        <Modal title={`Detail KK ${detailKK.nomor_kk}`} onClose={() => setDetailKK(null)}>
+          <KKDetail k={detailKK} anggota={anggota.filter((a) => a.kk_id === detailKK.id)} />
         </Modal>
       )}
     </div>
   );
 }
 
+function FilterBox({ children }: { children: React.ReactNode }) {
+  return <div className="flex items-center gap-1.5 glass rounded-xl px-2 py-1.5 text-xs">{children}</div>;
+}
+
 function StatusBadge({ status }: { status: StatusWarga }) {
   const map: Record<StatusWarga, string> = {
-    Tetap: "bg-primary/15 text-primary",
-    Kontrak: "bg-amber-500/15 text-amber-600",
-    Kos: "bg-sky-500/15 text-sky-600",
-    Pindah: "bg-muted text-muted-foreground",
-    Meninggal: "bg-destructive/15 text-destructive",
+    "Warga Tetap": "bg-primary/15 text-primary",
+    "Warga Domisili": "bg-sky-500/15 text-sky-600",
+    "Warga Kontrak/Sewa": "bg-amber-500/15 text-amber-600",
   };
   return <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${map[status]}`}>{status}</span>;
 }
 
-function KKForm({ onSubmit }: { onSubmit: (data: Omit<KK, "id" | "createdAt">) => void }) {
-  const [nomorKK, setN] = useState("");
-  const [kepala, setK] = useState("");
-  const [alamat, setA] = useState("");
+function RowActions({ onView, onEdit, onDelete }: { onView?: () => void; onEdit?: () => void; onDelete?: () => void }) {
   return (
-    <form onSubmit={(e) => { e.preventDefault(); if (!nomorKK || !kepala) return; onSubmit({ nomorKK, kepala, alamat }); }} className="space-y-3">
-      <Field label="No. KK"><input required value={nomorKK} onChange={(e) => setN(e.target.value)} className="form-inp" /></Field>
-      <Field label="Kepala Keluarga"><input required value={kepala} onChange={(e) => setK(e.target.value)} className="form-inp" /></Field>
-      <Field label="Alamat"><input value={alamat} onChange={(e) => setA(e.target.value)} className="form-inp" /></Field>
-      <SubmitBtn>Simpan KK</SubmitBtn>
-    </form>
+    <div className="flex items-center gap-1">
+      {onView && <button onClick={onView} className="p-1 rounded hover:bg-accent text-muted-foreground" title="Detail"><Eye className="h-3.5 w-3.5" /></button>}
+      {onEdit && <button onClick={onEdit} className="p-1 rounded hover:bg-accent text-primary" title="Edit"><Pencil className="h-3.5 w-3.5" /></button>}
+      {onDelete && <button onClick={onDelete} className="p-1 rounded hover:bg-destructive/10 text-destructive" title="Hapus"><Trash2 className="h-3.5 w-3.5" /></button>}
+    </div>
   );
 }
 
-function WargaForm({ kks, onSubmit }: { kks: KK[]; onSubmit: (data: Omit<Warga, "id" | "createdAt">) => void }) {
-  const [f, setF] = useState<Omit<Warga, "id" | "createdAt">>({ kkId: kks[0]?.id ?? "", nik: "", nama: "", jk: "L", tanggalLahir: "", status: "Tetap", pekerjaan: "", noHp: "" });
+function KKForm({ initial, onSubmit }: { initial: KK | null; onSubmit: (d: Omit<KK, "id">, foto: File | null) => Promise<void> }) {
+  const [f, setF] = useState<Omit<KK, "id">>({
+    nomor_kk: initial?.nomor_kk ?? "",
+    kepala_keluarga: initial?.kepala_keluarga ?? "",
+    alamat: initial?.alamat ?? "",
+    no_wa: initial?.no_wa ?? "",
+    rt: initial?.rt ?? "",
+    rw: initial?.rw ?? "",
+    status_kk: initial?.status_kk ?? "Aktif",
+    foto_kk_url: initial?.foto_kk_url ?? null,
+  });
+  const [foto, setFoto] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const set = (p: Partial<typeof f>) => setF((prev) => ({ ...prev, ...p }));
   return (
-    <form onSubmit={(e) => { e.preventDefault(); if (!f.nama || !f.nik) return; onSubmit(f); }} className="space-y-3">
-      <Field label="NIK"><input required value={f.nik} onChange={(e) => set({ nik: e.target.value })} className="form-inp" /></Field>
-      <Field label="Nama Lengkap"><input required value={f.nama} onChange={(e) => set({ nama: e.target.value })} className="form-inp" /></Field>
+    <form onSubmit={async (e) => {
+      e.preventDefault(); if (!f.nomor_kk || !f.kepala_keluarga || !f.alamat) return;
+      setBusy(true); setError(null);
+      try { await onSubmit(f, foto); } catch (err) { setError(err instanceof Error ? err.message : "Gagal menyimpan"); }
+      finally { setBusy(false); }
+    }} className="space-y-3">
+      <Field label="No. KK *"><input required value={f.nomor_kk} onChange={(e) => set({ nomor_kk: e.target.value })} className="form-inp" /></Field>
+      <Field label="Nama Kepala Keluarga *"><input required value={f.kepala_keluarga} onChange={(e) => set({ kepala_keluarga: e.target.value })} className="form-inp" /></Field>
+      <Field label="Alamat *"><textarea required value={f.alamat} onChange={(e) => set({ alamat: e.target.value })} className="form-inp" rows={2} /></Field>
       <div className="grid grid-cols-2 gap-2">
-        <Field label="JK"><select value={f.jk} onChange={(e) => set({ jk: e.target.value as "L" | "P" })} className="form-inp"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></Field>
-        <Field label="Tanggal Lahir"><input type="date" value={f.tanggalLahir} onChange={(e) => set({ tanggalLahir: e.target.value })} className="form-inp" /></Field>
+        <Field label="RT"><input value={f.rt ?? ""} onChange={(e) => set({ rt: e.target.value })} className="form-inp" placeholder="06" /></Field>
+        <Field label="RW"><input value={f.rw ?? ""} onChange={(e) => set({ rw: e.target.value })} className="form-inp" placeholder="02" /></Field>
       </div>
-      <Field label="Status">
-        <select value={f.status} onChange={(e) => set({ status: e.target.value as StatusWarga })} className="form-inp">
-          {(["Tetap", "Kontrak", "Kos", "Pindah", "Meninggal"] as const).map((s) => <option key={s}>{s}</option>)}
+      <Field label="Nomor WhatsApp"><input value={f.no_wa ?? ""} onChange={(e) => set({ no_wa: e.target.value })} className="form-inp" placeholder="08xxxxxxxxxx" /></Field>
+      <Field label="Status KK">
+        <select value={f.status_kk} onChange={(e) => set({ status_kk: e.target.value as "Aktif" | "Pindah" })} className="form-inp">
+          <option>Aktif</option><option>Pindah</option>
         </select>
       </Field>
-      <Field label="KK">
-        <select value={f.kkId} onChange={(e) => set({ kkId: e.target.value })} className="form-inp">
-          <option value="">— pilih KK —</option>
-          {kks.map((k) => <option key={k.id} value={k.id}>{k.nomorKK} · {k.kepala}</option>)}
-        </select>
+      <Field label="Foto KK (opsional)">
+        <input type="file" accept="image/*" onChange={(e) => setFoto(e.target.files?.[0] ?? null)} className="form-inp" />
       </Field>
-      <div className="grid grid-cols-2 gap-2">
-        <Field label="Pekerjaan"><input value={f.pekerjaan} onChange={(e) => set({ pekerjaan: e.target.value })} className="form-inp" /></Field>
-        <Field label="No. HP"><input value={f.noHp} onChange={(e) => set({ noHp: e.target.value })} className="form-inp" /></Field>
-      </div>
-      <SubmitBtn>Simpan Warga</SubmitBtn>
+      {error && <div className="text-xs text-destructive">{error}</div>}
+      <SubmitBtn>{busy ? "Menyimpan…" : "Simpan KK"}</SubmitBtn>
     </form>
   );
 }
 
-function MutasiForm({ tipe, onSubmit }: { tipe: MutasiTipe; onSubmit: (d: Omit<Mutasi, "id" | "waktu" | "petugas">) => void }) {
-  const [nama, setN] = useState("");
-  const [tgl, setT] = useState(new Date().toISOString().slice(0, 10));
-  const [ket, setK] = useState("");
+function AnggotaForm({ kks, anggotaAll, initial, onSubmit }: {
+  kks: KK[]; anggotaAll: Anggota[]; initial: Anggota | null;
+  onSubmit: (d: Omit<Anggota, "id">, foto: File | null) => Promise<void>;
+}) {
+  const [f, setF] = useState<Omit<Anggota, "id">>({
+    kk_id: initial?.kk_id ?? kks[0]?.id ?? "",
+    nik: initial?.nik ?? "",
+    nama: initial?.nama ?? "",
+    jenis_kelamin: initial?.jenis_kelamin ?? "Laki-laki",
+    tempat_lahir: initial?.tempat_lahir ?? "",
+    tanggal_lahir: initial?.tanggal_lahir ?? "",
+    agama: initial?.agama ?? "Islam",
+    pendidikan: initial?.pendidikan ?? "",
+    pekerjaan: initial?.pekerjaan ?? "",
+    status_keluarga: initial?.status_keluarga ?? "Anak",
+    status_perkawinan: initial?.status_perkawinan ?? "Belum Kawin",
+    status_warga: initial?.status_warga ?? "Warga Tetap",
+    no_hp: initial?.no_hp ?? "",
+    foto_url: initial?.foto_url ?? null,
+  });
+  const [foto, setFoto] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const set = (p: Partial<typeof f>) => setF((prev) => ({ ...prev, ...p }));
+
+  const kkCount = anggotaAll.filter((a) => a.kk_id === f.kk_id && a.id !== initial?.id).length;
+  const overLimit = !initial && kkCount >= 8;
+
+  if (kks.length === 0) {
+    return <div className="text-sm text-muted-foreground">Belum ada KK. Tambahkan KK terlebih dahulu.</div>;
+  }
+
   return (
-    <form onSubmit={(e) => { e.preventDefault(); if (!nama) return; onSubmit({ tipe, nama, tanggal: tgl, keterangan: ket }); }} className="space-y-3">
-      <Field label="Nama Warga"><input required value={nama} onChange={(e) => setN(e.target.value)} className="form-inp" /></Field>
-      <Field label="Tanggal"><input type="date" value={tgl} onChange={(e) => setT(e.target.value)} className="form-inp" /></Field>
-      <Field label="Keterangan"><textarea value={ket} onChange={(e) => setK(e.target.value)} className="form-inp" rows={2} /></Field>
-      <SubmitBtn>Catat Mutasi {tipe}</SubmitBtn>
+    <form onSubmit={async (e) => {
+      e.preventDefault();
+      if (!f.nik || !f.nama || !f.kk_id) return;
+      if (overLimit) { setError("KK ini sudah memiliki 8 anggota."); return; }
+      setBusy(true); setError(null);
+      try { await onSubmit(f, foto); } catch (err) { setError(err instanceof Error ? err.message : "Gagal menyimpan"); }
+      finally { setBusy(false); }
+    }} className="space-y-3">
+      <Field label="Kartu Keluarga *">
+        <select required value={f.kk_id} onChange={(e) => set({ kk_id: e.target.value })} className="form-inp">
+          {kks.map((k) => <option key={k.id} value={k.id}>{k.nomor_kk} · {k.kepala_keluarga}</option>)}
+        </select>
+      </Field>
+      {overLimit && <div className="text-xs text-destructive">KK ini sudah berisi 8 anggota (batas maksimal).</div>}
+      <Field label="NIK *"><input required maxLength={16} value={f.nik} onChange={(e) => set({ nik: e.target.value })} className="form-inp" /></Field>
+      <Field label="Nama Lengkap *"><input required value={f.nama} onChange={(e) => set({ nama: e.target.value })} className="form-inp" /></Field>
+      <div className="grid grid-cols-2 gap-2">
+        <Field label="Jenis Kelamin"><select value={f.jenis_kelamin} onChange={(e) => set({ jenis_kelamin: e.target.value as JK })} className="form-inp">{JK_LIST.map((j) => <option key={j}>{j}</option>)}</select></Field>
+        <Field label="Agama"><select value={f.agama ?? ""} onChange={(e) => set({ agama: e.target.value })} className="form-inp">{AGAMA_LIST.map((a) => <option key={a}>{a}</option>)}</select></Field>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <Field label="Tempat Lahir"><input value={f.tempat_lahir ?? ""} onChange={(e) => set({ tempat_lahir: e.target.value })} className="form-inp" /></Field>
+        <Field label="Tanggal Lahir"><input type="date" value={f.tanggal_lahir ?? ""} onChange={(e) => set({ tanggal_lahir: e.target.value })} className="form-inp" /></Field>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <Field label="Pendidikan"><select value={f.pendidikan ?? ""} onChange={(e) => set({ pendidikan: e.target.value })} className="form-inp"><option value="">—</option>{PENDIDIKAN_LIST.map((p) => <option key={p}>{p}</option>)}</select></Field>
+        <Field label="Pekerjaan"><input value={f.pekerjaan ?? ""} onChange={(e) => set({ pekerjaan: e.target.value })} className="form-inp" /></Field>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <Field label="Status Dalam Keluarga"><select value={f.status_keluarga ?? ""} onChange={(e) => set({ status_keluarga: e.target.value })} className="form-inp">{STATUS_KELUARGA_LIST.map((s) => <option key={s}>{s}</option>)}</select></Field>
+        <Field label="Status Perkawinan"><select value={f.status_perkawinan ?? ""} onChange={(e) => set({ status_perkawinan: e.target.value })} className="form-inp">{STATUS_PERKAWINAN_LIST.map((s) => <option key={s}>{s}</option>)}</select></Field>
+      </div>
+      <Field label="Status Warga">
+        <select value={f.status_warga} onChange={(e) => set({ status_warga: e.target.value as StatusWarga })} className="form-inp">
+          {STATUS_WARGA.map((s) => <option key={s}>{s}</option>)}
+        </select>
+      </Field>
+      <Field label="No. HP"><input value={f.no_hp ?? ""} onChange={(e) => set({ no_hp: e.target.value })} className="form-inp" /></Field>
+      <Field label="Foto Warga (opsional)">
+        <input type="file" accept="image/*" onChange={(e) => setFoto(e.target.files?.[0] ?? null)} className="form-inp" />
+      </Field>
+      {error && <div className="text-xs text-destructive">{error}</div>}
+      <SubmitBtn>{busy ? "Menyimpan…" : "Simpan"}</SubmitBtn>
     </form>
+  );
+}
+
+function AnggotaDetail({ a, kk }: { a: Anggota; kk: KK | null }) {
+  const url = useSignedUrl(a.foto_url);
+  return (
+    <div className="space-y-3 text-sm">
+      <div className="flex items-center gap-3">
+        <div className="h-20 w-20 rounded-2xl bg-muted grid place-items-center overflow-hidden shrink-0">
+          {url ? <img src={url} alt={a.nama} className="h-full w-full object-cover" /> : <ImageIcon className="h-6 w-6 text-muted-foreground" />}
+        </div>
+        <div className="min-w-0">
+          <div className="font-bold">{a.nama}</div>
+          <div className="text-xs text-muted-foreground">NIK {a.nik}</div>
+          <div className="mt-1"><StatusBadge status={a.status_warga} /></div>
+        </div>
+      </div>
+      <DetailRow label="KK" value={kk ? `${kk.nomor_kk} · ${kk.kepala_keluarga}` : "-"} />
+      <DetailRow label="Jenis Kelamin" value={a.jenis_kelamin} />
+      <DetailRow label="Tempat / Tgl Lahir" value={`${a.tempat_lahir ?? "-"}, ${a.tanggal_lahir ? tanggal(a.tanggal_lahir) : "-"}`} />
+      <DetailRow label="Agama" value={a.agama ?? "-"} />
+      <DetailRow label="Pendidikan" value={a.pendidikan ?? "-"} />
+      <DetailRow label="Pekerjaan" value={a.pekerjaan ?? "-"} />
+      <DetailRow label="Status Keluarga" value={a.status_keluarga ?? "-"} />
+      <DetailRow label="Status Perkawinan" value={a.status_perkawinan ?? "-"} />
+      <DetailRow label="No. HP" value={a.no_hp ?? "-"} />
+    </div>
+  );
+}
+
+function KKDetail({ k, anggota }: { k: KK; anggota: Anggota[] }) {
+  const url = useSignedUrl(k.foto_kk_url);
+  return (
+    <div className="space-y-3 text-sm">
+      {url && <img src={url} alt="KK" className="w-full rounded-2xl" />}
+      <DetailRow label="No. KK" value={k.nomor_kk} />
+      <DetailRow label="Kepala Keluarga" value={k.kepala_keluarga} />
+      <DetailRow label="Alamat" value={k.alamat} />
+      <DetailRow label="RT / RW" value={`${k.rt ?? "-"} / ${k.rw ?? "-"}`} />
+      <DetailRow label="WhatsApp" value={k.no_wa ?? "-"} />
+      <DetailRow label="Status" value={k.status_kk} />
+      <div className="pt-2">
+        <div className="text-xs font-semibold text-muted-foreground mb-1">Anggota ({anggota.length}/8)</div>
+        {anggota.length === 0 ? (
+          <div className="text-xs text-muted-foreground">Belum ada anggota.</div>
+        ) : (
+          <ul className="space-y-1">
+            {anggota.map((a) => (
+              <li key={a.id} className="glass rounded-xl px-3 py-2 flex items-center justify-between">
+                <span className="truncate">{a.nama}</span>
+                <span className="text-[10px] text-muted-foreground">{a.status_keluarga ?? "-"}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-3 text-xs">
+      <span className="text-muted-foreground shrink-0">{label}</span>
+      <span className="font-medium text-right break-words">{value}</span>
+    </div>
   );
 }
 
