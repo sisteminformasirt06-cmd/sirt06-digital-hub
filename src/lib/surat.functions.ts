@@ -156,7 +156,7 @@ export const updateSuratStatus = createServerFn({ method: "POST" })
     } else {
       patch.alasan_tolak = null;
     }
-    const { error } = await supabaseAdmin.from("surat_pengajuan").update(patch).eq("id", data.id);
+    const { error } = await supabaseAdmin.from("surat_pengajuan").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
     await logActor(data, `Ubah status surat → ${data.status}`, "Administrasi", data.id);
     return { ok: true };
