@@ -40,6 +40,7 @@ import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AdministrasiRouteImport } from './routes/administrasi'
 import { Route as AbsensiRouteImport } from './routes/absensi'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VerifikasiSuratIdRouteImport } from './routes/verifikasi-surat.$id'
 
 const WhatsappRoute = WhatsappRouteImport.update({
   id: '/whatsapp',
@@ -196,6 +197,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VerifikasiSuratIdRoute = VerifikasiSuratIdRouteImport.update({
+  id: '/verifikasi-surat/$id',
+  path: '/verifikasi-surat/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -229,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
   '/whatsapp': typeof WhatsappRoute
+  '/verifikasi-surat/$id': typeof VerifikasiSuratIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -262,6 +269,7 @@ export interface FileRoutesByTo {
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
   '/whatsapp': typeof WhatsappRoute
+  '/verifikasi-surat/$id': typeof VerifikasiSuratIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -296,6 +304,7 @@ export interface FileRoutesById {
   '/umkm': typeof UmkmRoute
   '/warga': typeof WargaRoute
   '/whatsapp': typeof WhatsappRoute
+  '/verifikasi-surat/$id': typeof VerifikasiSuratIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -331,6 +340,7 @@ export interface FileRouteTypes {
     | '/umkm'
     | '/warga'
     | '/whatsapp'
+    | '/verifikasi-surat/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -364,6 +374,7 @@ export interface FileRouteTypes {
     | '/umkm'
     | '/warga'
     | '/whatsapp'
+    | '/verifikasi-surat/$id'
   id:
     | '__root__'
     | '/'
@@ -397,6 +408,7 @@ export interface FileRouteTypes {
     | '/umkm'
     | '/warga'
     | '/whatsapp'
+    | '/verifikasi-surat/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -431,6 +443,7 @@ export interface RootRouteChildren {
   UmkmRoute: typeof UmkmRoute
   WargaRoute: typeof WargaRoute
   WhatsappRoute: typeof WhatsappRoute
+  VerifikasiSuratIdRoute: typeof VerifikasiSuratIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -652,6 +665,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/verifikasi-surat/$id': {
+      id: '/verifikasi-surat/$id'
+      path: '/verifikasi-surat/$id'
+      fullPath: '/verifikasi-surat/$id'
+      preLoaderRoute: typeof VerifikasiSuratIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -687,6 +707,7 @@ const rootRouteChildren: RootRouteChildren = {
   UmkmRoute: UmkmRoute,
   WargaRoute: WargaRoute,
   WhatsappRoute: WhatsappRoute,
+  VerifikasiSuratIdRoute: VerifikasiSuratIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
