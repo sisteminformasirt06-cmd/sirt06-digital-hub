@@ -37,7 +37,6 @@ import { Route as EmergencyRouteImport } from './routes/emergency'
 import { Route as BackupRestoreRouteImport } from './routes/backup-restore'
 import { Route as AuditLogRouteImport } from './routes/audit-log'
 import { Route as AgendaRouteImport } from './routes/agenda'
-import { Route as AdministrasiRouteImport } from './routes/administrasi'
 import { Route as AbsensiRouteImport } from './routes/absensi'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -181,11 +180,6 @@ const AgendaRoute = AgendaRouteImport.update({
   path: '/agenda',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdministrasiRoute = AdministrasiRouteImport.update({
-  id: '/administrasi',
-  path: '/administrasi',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AbsensiRoute = AbsensiRouteImport.update({
   id: '/absensi',
   path: '/absensi',
@@ -200,7 +194,6 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/absensi': typeof AbsensiRoute
-  '/administrasi': typeof AdministrasiRoute
   '/agenda': typeof AgendaRoute
   '/audit-log': typeof AuditLogRoute
   '/backup-restore': typeof BackupRestoreRoute
@@ -233,7 +226,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/absensi': typeof AbsensiRoute
-  '/administrasi': typeof AdministrasiRoute
   '/agenda': typeof AgendaRoute
   '/audit-log': typeof AuditLogRoute
   '/backup-restore': typeof BackupRestoreRoute
@@ -267,7 +259,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/absensi': typeof AbsensiRoute
-  '/administrasi': typeof AdministrasiRoute
   '/agenda': typeof AgendaRoute
   '/audit-log': typeof AuditLogRoute
   '/backup-restore': typeof BackupRestoreRoute
@@ -302,7 +293,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/absensi'
-    | '/administrasi'
     | '/agenda'
     | '/audit-log'
     | '/backup-restore'
@@ -335,7 +325,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/absensi'
-    | '/administrasi'
     | '/agenda'
     | '/audit-log'
     | '/backup-restore'
@@ -368,7 +357,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/absensi'
-    | '/administrasi'
     | '/agenda'
     | '/audit-log'
     | '/backup-restore'
@@ -402,7 +390,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AbsensiRoute: typeof AbsensiRoute
-  AdministrasiRoute: typeof AdministrasiRoute
   AgendaRoute: typeof AgendaRoute
   AuditLogRoute: typeof AuditLogRoute
   BackupRestoreRoute: typeof BackupRestoreRoute
@@ -631,13 +618,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgendaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/administrasi': {
-      id: '/administrasi'
-      path: '/administrasi'
-      fullPath: '/administrasi'
-      preLoaderRoute: typeof AdministrasiRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/absensi': {
       id: '/absensi'
       path: '/absensi'
@@ -658,7 +638,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AbsensiRoute: AbsensiRoute,
-  AdministrasiRoute: AdministrasiRoute,
   AgendaRoute: AgendaRoute,
   AuditLogRoute: AuditLogRoute,
   BackupRestoreRoute: BackupRestoreRoute,
