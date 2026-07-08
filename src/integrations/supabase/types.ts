@@ -263,6 +263,7 @@ export type Database = {
           id: string
           jenis: string
           keperluan: string
+          nomor_kk: string | null
           nomor_surat: string
           pemohon_alamat: string | null
           pemohon_nama: string
@@ -283,6 +284,7 @@ export type Database = {
           id?: string
           jenis: string
           keperluan: string
+          nomor_kk?: string | null
           nomor_surat: string
           pemohon_alamat?: string | null
           pemohon_nama: string
@@ -303,6 +305,7 @@ export type Database = {
           id?: string
           jenis?: string
           keperluan?: string
+          nomor_kk?: string | null
           nomor_surat?: string
           pemohon_alamat?: string | null
           pemohon_nama?: string
@@ -392,7 +395,13 @@ export type Database = {
         | "sie_kematian"
         | "sie_umum"
         | "warga"
-      surat_status: "Menunggu" | "Diproses" | "Disetujui" | "Ditolak"
+      surat_status:
+        | "Draft"
+        | "Menunggu"
+        | "Diproses"
+        | "Disetujui"
+        | "Ditolak"
+        | "Selesai"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -534,7 +543,14 @@ export const Constants = {
         "sie_umum",
         "warga",
       ],
-      surat_status: ["Menunggu", "Diproses", "Disetujui", "Ditolak"],
+      surat_status: [
+        "Draft",
+        "Menunggu",
+        "Diproses",
+        "Disetujui",
+        "Ditolak",
+        "Selesai",
+      ],
     },
   },
 } as const

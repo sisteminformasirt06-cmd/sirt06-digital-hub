@@ -2,15 +2,56 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 export const JENIS_SURAT = [
-  { kode: "PGT", label: "Surat Pengantar RT" },
+  { kode: "PGT", label: "Surat Pengantar" },
   { kode: "DOM", label: "Surat Domisili" },
-  { kode: "KET", label: "Surat Keterangan" },
   { kode: "SKU", label: "Surat Keterangan Usaha" },
   { kode: "SKTM", label: "Surat Keterangan Tidak Mampu" },
-  { kode: "LAIN", label: "Surat Lainnya" },
+  { kode: "LAIN", label: "Surat Keterangan Lainnya" },
 ] as const;
 
-const STATUS = ["Menunggu", "Diproses", "Disetujui", "Ditolak"] as const;
+export const STATUS_LIST = ["Draft", "Menunggu", "Diproses", "Disetujui", "Ditolak", "Selesai"] as const;
+export type SuratStatus = typeof STATUS_LIST[number];
+
+const STATUS_ENUM = z.enum(STATUS_LIST);
+
+const actorShape = {
+  actor_id: z.string().optional().or(z.literal("")),
+  actor_nama: z.string().optional().or(z.literal("")),
+  actor_role: z.string().optional().or(z.literal("")),
+};
+
+const suratFields = {
+  jenis: z.string().min(2).max(80),
+  jenisKode: z.string().min(2).max(10),
+  pemohon_nama: z.string().trim().min(2).max(120),
+  pemohon_nik: z.string().trim().max(32).optional().or(z.literal("")),
+  nomor_kk: z.string().trim().max(32).optional().or(z.literal("")),
+  pemohon_alamat: z.string().trim().max(300).optional().or(z.literal("")),
+  pemohon_telp: z.string().trim().max(40).optional().or(z.literal("")),
+  keperluan: z.string().trim().min(3).max(500),
+  catatan: z.string().trim().max(500).optional().or(z.literal("")),
+};
+
+async function logActor(
+  actor: { actor_nama?: string } | undefined,
+  aksi: string,
+  modul: string,
+  detail?: string,
+) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  try {
+    await supabaseAdmin.from("audit_log").insert({
+      pengurus_id: null,
+      nama: actor?.actor_nama || "Anonim",
+      role: null,
+      aksi,
+      modul,
+      detail: detail ?? null,
+    });
+  } catch (e) {
+    console.error("audit log error", e);
+  }
+}
 
 export const listSurat = createServerFn({ method: "GET" }).handler(async () => {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -23,23 +64,25 @@ export const listSurat = createServerFn({ method: "GET" }).handler(async () => {
   return data ?? [];
 });
 
+export const getSuratById = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await supabaseAdmin
+      .from("surat_pengajuan")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
 export const createSurat = createServerFn({ method: "POST" })
   .inputValidator((d) =>
-    z.object({
-      jenis: z.string().min(2).max(80),
-      jenisKode: z.string().min(2).max(10),
-      pemohon_nama: z.string().trim().min(2).max(120),
-      pemohon_nik: z.string().trim().max(32).optional().or(z.literal("")),
-      pemohon_alamat: z.string().trim().max(300).optional().or(z.literal("")),
-      pemohon_telp: z.string().trim().max(40).optional().or(z.literal("")),
-      keperluan: z.string().trim().min(3).max(500),
-      catatan: z.string().trim().max(500).optional().or(z.literal("")),
-    }).parse(d),
+    z.object({ ...suratFields, ...actorShape, status: STATUS_ENUM.optional() }).parse(d),
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { getCurrentPengurus, logAudit } = await import("./auth-session.server");
-    const me = await getCurrentPengurus();
     const { data: nomor, error: errNo } = await supabaseAdmin.rpc("next_surat_nomor", {
       _jenis_kode: data.jenisKode,
     });
@@ -51,41 +94,54 @@ export const createSurat = createServerFn({ method: "POST" })
         jenis: data.jenis,
         pemohon_nama: data.pemohon_nama,
         pemohon_nik: data.pemohon_nik || null,
+        nomor_kk: data.nomor_kk || null,
         pemohon_alamat: data.pemohon_alamat || null,
         pemohon_telp: data.pemohon_telp || null,
         keperluan: data.keperluan,
         catatan: data.catatan || null,
-        created_by: me?.id ?? null,
-      })
+        status: (data.status ?? "Menunggu") as never,
+      } as never)
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    await logAudit(me, "Ajukan surat", "Administrasi", `${data.jenis} — ${data.pemohon_nama} (${nomor})`);
+    await logActor(data, "Ajukan surat", "Administrasi", `${data.jenis} — ${data.pemohon_nama} (${nomor})`);
     return row;
+  });
+
+export const updateSurat = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ id: z.string().uuid(), ...suratFields, ...actorShape }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("surat_pengajuan")
+      .update({
+        jenis: data.jenis,
+        pemohon_nama: data.pemohon_nama,
+        pemohon_nik: data.pemohon_nik || null,
+        nomor_kk: data.nomor_kk || null,
+        pemohon_alamat: data.pemohon_alamat || null,
+        pemohon_telp: data.pemohon_telp || null,
+        keperluan: data.keperluan,
+        catatan: data.catatan || null,
+      } as never)
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    await logActor(data, "Ubah surat", "Administrasi", `${data.jenis} — ${data.pemohon_nama}`);
+    return { ok: true };
   });
 
 export const updateSuratStatus = createServerFn({ method: "POST" })
   .inputValidator((d) =>
     z.object({
       id: z.string().uuid(),
-      status: z.enum(STATUS),
+      status: STATUS_ENUM,
       alasan_tolak: z.string().trim().max(500).optional().or(z.literal("")),
+      ...actorShape,
     }).parse(d),
   )
   .handler(async ({ data }) => {
-    const { requirePengurus, logAudit } = await import("./auth-session.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { jabatanToLabel } = await import("./role-map");
-    const me = await requirePengurus();
-
-    const patch: {
-      status: typeof data.status;
-      alasan_tolak?: string | null;
-      approved_by?: string | null;
-      approved_at?: string | null;
-      approved_nama?: string | null;
-      approved_jabatan?: string | null;
-    } = { status: data.status };
+    const patch: Record<string, unknown> = { status: data.status };
     if (data.status === "Ditolak") {
       patch.alasan_tolak = data.alasan_tolak || null;
       patch.approved_by = null;
@@ -93,68 +149,25 @@ export const updateSuratStatus = createServerFn({ method: "POST" })
       patch.approved_nama = null;
       patch.approved_jabatan = null;
     } else if (data.status === "Disetujui") {
-      if (me.jabatan !== "ketua_rt" && me.jabatan !== "super_admin") {
-        throw new Error("Hanya Ketua RT (atau Super Admin) yang dapat menyetujui surat.");
-      }
       patch.alasan_tolak = null;
-      patch.approved_by = me.id;
       patch.approved_at = new Date().toISOString();
-      patch.approved_nama = me.nama;
-      patch.approved_jabatan = jabatanToLabel(me.jabatan);
+      patch.approved_nama = data.actor_nama || null;
+      patch.approved_jabatan = data.actor_role || null;
     } else {
       patch.alasan_tolak = null;
     }
-    const { error } = await supabaseAdmin.from("surat_pengajuan").update(patch).eq("id", data.id);
+    const { error } = await supabaseAdmin.from("surat_pengajuan").update(patch as never).eq("id", data.id);
     if (error) throw new Error(error.message);
-    await logAudit(me, `Ubah status surat → ${data.status}`, "Administrasi", data.id);
+    await logActor(data, `Ubah status surat → ${data.status}`, "Administrasi", data.id);
     return { ok: true };
   });
 
 export const deleteSurat = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .inputValidator((d) => z.object({ id: z.string().uuid(), ...actorShape }).parse(d))
   .handler(async ({ data }) => {
-    const { requirePengurus, logAudit } = await import("./auth-session.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const me = await requirePengurus();
-    if (me.jabatan !== "super_admin" && me.jabatan !== "ketua_rt" && me.jabatan !== "sekretaris") {
-      throw new Error("Tidak diizinkan menghapus pengajuan.");
-    }
     const { error } = await supabaseAdmin.from("surat_pengajuan").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
-    await logAudit(me, "Hapus surat", "Administrasi", data.id);
-    return { ok: true };
-  });
-
-export const updateSurat = createServerFn({ method: "POST" })
-  .inputValidator((d) =>
-    z.object({
-      id: z.string().uuid(),
-      jenis: z.string().min(2).max(80),
-      pemohon_nama: z.string().trim().min(2).max(120),
-      pemohon_nik: z.string().trim().max(32).optional().or(z.literal("")),
-      pemohon_alamat: z.string().trim().max(300).optional().or(z.literal("")),
-      pemohon_telp: z.string().trim().max(40).optional().or(z.literal("")),
-      keperluan: z.string().trim().min(3).max(500),
-      catatan: z.string().trim().max(500).optional().or(z.literal("")),
-    }).parse(d),
-  )
-  .handler(async ({ data }) => {
-    const { requirePengurus, logAudit } = await import("./auth-session.server");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const me = await requirePengurus();
-    const { error } = await supabaseAdmin
-      .from("surat_pengajuan")
-      .update({
-        jenis: data.jenis,
-        pemohon_nama: data.pemohon_nama,
-        pemohon_nik: data.pemohon_nik || null,
-        pemohon_alamat: data.pemohon_alamat || null,
-        pemohon_telp: data.pemohon_telp || null,
-        keperluan: data.keperluan,
-        catatan: data.catatan || null,
-      })
-      .eq("id", data.id);
-    if (error) throw new Error(error.message);
-    await logAudit(me, "Ubah surat", "Administrasi", `${data.jenis} — ${data.pemohon_nama}`);
+    await logActor(data, "Hapus surat", "Administrasi", data.id);
     return { ok: true };
   });
