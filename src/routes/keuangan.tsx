@@ -133,7 +133,7 @@ function KeuanganPage() {
       transaksi_id: data.id,
       aksi: "create",
       before_data: null,
-      after_data: data,
+      after_data: data as unknown as Record<string, unknown>,
       diubah_oleh_nama: user.nama,
       diubah_oleh_role: user.role,
     });
@@ -164,8 +164,8 @@ function KeuanganPage() {
     await supabase.from("transaksi_kas_history").insert({
       transaksi_id: before.id,
       aksi: "update",
-      before_data: before,
-      after_data: data,
+      before_data: before as unknown as Record<string, unknown>,
+      after_data: data as unknown as Record<string, unknown>,
       diubah_oleh_nama: user.nama,
       diubah_oleh_role: user.role,
     });
@@ -180,7 +180,7 @@ function KeuanganPage() {
     await supabase.from("transaksi_kas_history").insert({
       transaksi_id: row.id,
       aksi: "delete",
-      before_data: row,
+      before_data: row as unknown as Record<string, unknown>,
       after_data: null,
       diubah_oleh_nama: user.nama,
       diubah_oleh_role: user.role,
