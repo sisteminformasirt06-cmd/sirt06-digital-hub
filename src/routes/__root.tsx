@@ -82,14 +82,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SiRT 06 Digital — Sistem Informasi RT 06" },
-      { name: "description", content: "Sistem Informasi RT 06 / RW 07 Bogeman Wetan — Digitalisasi dan Transparansi" },
+      { title: "Dashboard — SiRT 06 Digital" },
+      { name: "description", content: "Dashboard komunitas RT 06 / RW 07 Bogeman Wetan." },
       { name: "author", content: "RT 06 / RW 07 Bogeman Wetan" },
-      { property: "og:title", content: "SiRT 06 Digital" },
-      { property: "og:description", content: "Dashboard komunitas modern untuk warga RT 06." },
+      { property: "og:title", content: "Dashboard — SiRT 06 Digital" },
+      { property: "og:description", content: "Dashboard komunitas RT 06 / RW 07 Bogeman Wetan." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Dashboard — SiRT 06 Digital" },
+      { name: "twitter:description", content: "Dashboard komunitas RT 06 / RW 07 Bogeman Wetan." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/54d6e7dc-4075-47f1-87c1-b138f72b35cf/id-preview-ee6c4b88--bd1d0ef8-ca08-4c16-ae0c-78538308f65f.lovable.app-1783590437447.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/54d6e7dc-4075-47f1-87c1-b138f72b35cf/id-preview-ee6c4b88--bd1d0ef8-ca08-4c16-ae0c-78538308f65f.lovable.app-1783590437447.png" },
     ],
     links: [
       {
