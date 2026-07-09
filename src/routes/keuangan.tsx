@@ -52,6 +52,10 @@ interface HistoryRow {
 
 type TabView = "transaksi" | "riwayat";
 
+function toJson(v: unknown): Json {
+  return JSON.parse(JSON.stringify(v)) as Json;
+}
+
 function KeuanganPage() {
   const { user, logAction } = useAuth();
   const { kasSaldoAwal } = useSettings();
