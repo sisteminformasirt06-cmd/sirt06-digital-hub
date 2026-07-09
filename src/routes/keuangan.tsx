@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { PageHeader, DataTable, Modal, Field, SubmitBtn } from "./warga";
 import { useSettings } from "@/lib/settings-context";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/keuangan")({
@@ -133,7 +134,7 @@ function KeuanganPage() {
       transaksi_id: data.id,
       aksi: "create",
       before_data: null,
-      after_data: data as unknown as Record<string, unknown>,
+      after_data: toJson(data),
       diubah_oleh_nama: user.nama,
       diubah_oleh_role: user.role,
     });
@@ -164,8 +165,8 @@ function KeuanganPage() {
     await supabase.from("transaksi_kas_history").insert({
       transaksi_id: before.id,
       aksi: "update",
-      before_data: before as unknown as Record<string, unknown>,
-      after_data: data as unknown as Record<string, unknown>,
+      before_data: toJson(before),
+      after_data: toJson(data),
       diubah_oleh_nama: user.nama,
       diubah_oleh_role: user.role,
     });
@@ -180,7 +181,7 @@ function KeuanganPage() {
     await supabase.from("transaksi_kas_history").insert({
       transaksi_id: row.id,
       aksi: "delete",
-      before_data: row as unknown as Record<string, unknown>,
+      before_data: toJson(row),
       after_data: null,
       diubah_oleh_nama: user.nama,
       diubah_oleh_role: user.role,
