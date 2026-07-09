@@ -331,6 +331,89 @@ export type Database = {
           },
         ]
       }
+      transaksi_kas: {
+        Row: {
+          created_at: string
+          id: string
+          jumlah: number
+          kas: string
+          keterangan: string
+          lampiran_url: string | null
+          petugas_nama: string
+          petugas_role: string | null
+          tanggal: string
+          tipe: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          jumlah: number
+          kas: string
+          keterangan: string
+          lampiran_url?: string | null
+          petugas_nama: string
+          petugas_role?: string | null
+          tanggal: string
+          tipe: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          jumlah?: number
+          kas?: string
+          keterangan?: string
+          lampiran_url?: string | null
+          petugas_nama?: string
+          petugas_role?: string | null
+          tanggal?: string
+          tipe?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      transaksi_kas_history: {
+        Row: {
+          after_data: Json | null
+          aksi: string
+          before_data: Json | null
+          created_at: string
+          diubah_oleh_nama: string
+          diubah_oleh_role: string | null
+          id: string
+          transaksi_id: string
+        }
+        Insert: {
+          after_data?: Json | null
+          aksi: string
+          before_data?: Json | null
+          created_at?: string
+          diubah_oleh_nama: string
+          diubah_oleh_role?: string | null
+          id?: string
+          transaksi_id: string
+        }
+        Update: {
+          after_data?: Json | null
+          aksi?: string
+          before_data?: Json | null
+          created_at?: string
+          diubah_oleh_nama?: string
+          diubah_oleh_role?: string | null
+          id?: string
+          transaksi_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaksi_kas_history_transaksi_id_fkey"
+            columns: ["transaksi_id"]
+            isOneToOne: false
+            referencedRelation: "transaksi_kas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
