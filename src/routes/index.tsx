@@ -177,6 +177,39 @@ function Dashboard() {
         </div>
       </div>
 
+      {/* Running text agenda berikutnya */}
+      <div className="overflow-hidden rounded-2xl glass border border-primary/20">
+        <div className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3 py-2.5">
+          <div className="shrink-0 h-8 px-2.5 rounded-lg bg-gradient-to-br from-fuchsia-500 to-pink-500 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-soft">
+            <CalendarCheck className="h-3 w-3" /> AGENDA
+          </div>
+          <div className="overflow-hidden flex-1 [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
+            <div
+              className="flex gap-10 whitespace-nowrap animate-marquee text-[13px] sm:text-sm font-medium"
+              style={{ animationDuration: `${marqueeSpeed}s` }}
+            >
+              {(agendaBerikut
+                ? [agendaText(agendaBerikut), agendaText(agendaBerikut)]
+                : ["Belum ada agenda."]
+              ).map((t, i) => (
+                <span key={i} className="text-foreground/90">{t}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {isPengurus && agendaH1.length > 0 && (
+        <div className="glass rounded-2xl border border-amber-500/30 px-3 py-2.5">
+          <div className="text-[11px] font-bold text-amber-600 dark:text-amber-400">🔔 Pengingat H-1</div>
+          {agendaH1.map((a) => (
+            <div key={a.id} className="text-[12px] sm:text-sm mt-0.5">
+              <b>{a.judul}</b> — besok {hariDari(a.tanggal)}, {tanggalPanjang(a.tanggal)} pukul {a.jam} WIB di {a.tempat || "-"}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Hero Header */}
       <section className="relative overflow-hidden rounded-3xl glass-strong p-5 sm:p-7">
         <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full gradient-primary opacity-20 blur-3xl" />
