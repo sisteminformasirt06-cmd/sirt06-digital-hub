@@ -343,7 +343,7 @@ function Dashboard() {
                 <p className="text-[11px] text-muted-foreground">{hari}, {tanggal}</p>
               </div>
             </div>
-            <Link to="/administrasi" className="text-[11px] text-primary font-semibold flex items-center gap-1 hover:underline">
+            <Link to="/agenda" className="text-[11px] text-primary font-semibold flex items-center gap-1 hover:underline">
               Semua <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
@@ -352,19 +352,19 @@ function Dashboard() {
               <div className="h-12 w-12 rounded-2xl bg-muted grid place-items-center mb-2">
                 <CalendarX className="h-5 w-5 text-muted-foreground" />
               </div>
-              <div className="text-sm font-semibold">Tidak ada agenda hari ini</div>
+              <div className="text-sm font-semibold">Belum ada agenda.</div>
               <p className="text-[11px] text-muted-foreground mt-0.5">Jadwal kegiatan akan tampil di sini saat tersedia.</p>
             </div>
           ) : (
             <ul className="space-y-2">
-              {agendaHariIni.map((a, i) => (
-                <li key={i} className="flex items-center gap-3 p-2.5 rounded-xl glass">
+              {agendaHariIni.map((a) => (
+                <li key={a.id} className="flex items-center gap-3 p-2.5 rounded-xl glass">
                   <div className="h-10 w-10 rounded-xl gradient-primary text-primary-foreground grid place-items-center shrink-0">
                     <Clock className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold truncate">{a.nama}</div>
-                    <div className="text-[11px] text-muted-foreground truncate">{a.jam} • {a.tempat}</div>
+                    <div className="text-sm font-semibold truncate">{a.judul}</div>
+                    <div className="text-[11px] text-muted-foreground truncate">{a.jam} WIB • {a.tempat || "-"}</div>
                   </div>
                 </li>
               ))}
