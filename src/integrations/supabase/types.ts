@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      agenda: {
+        Row: {
+          arsip: boolean
+          created_at: string
+          deskripsi: string | null
+          dibuat_oleh: string | null
+          disetujui: boolean
+          id: string
+          jam: string
+          judul: string
+          status: string
+          tanggal: string
+          tempat: string
+          updated_at: string
+        }
+        Insert: {
+          arsip?: boolean
+          created_at?: string
+          deskripsi?: string | null
+          dibuat_oleh?: string | null
+          disetujui?: boolean
+          id?: string
+          jam?: string
+          judul: string
+          status?: string
+          tanggal: string
+          tempat?: string
+          updated_at?: string
+        }
+        Update: {
+          arsip?: boolean
+          created_at?: string
+          deskripsi?: string | null
+          dibuat_oleh?: string | null
+          disetujui?: boolean
+          id?: string
+          jam?: string
+          judul?: string
+          status?: string
+          tanggal?: string
+          tempat?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       anggota_keluarga: {
         Row: {
           agama: string | null

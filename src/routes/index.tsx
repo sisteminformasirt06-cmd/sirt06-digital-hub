@@ -12,6 +12,11 @@ import { loadLS } from "@/lib/storage";
 import { PENGUMUMAN_KEY, isAktif, type Pengumuman } from "./media";
 import { useSettings } from "@/lib/settings-context";
 import { rupiah } from "@/lib/storage";
+import { useAuth } from "@/lib/auth-context";
+import {
+  fetchAgenda, agendaText, hariDari, tanggalPanjang, selisihHari,
+  readMarqueeSpeed, type Agenda,
+} from "@/lib/agenda-shared";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -46,6 +51,10 @@ const quickAccess = [
 
 function Dashboard() {
   const { identity, kasSaldoAwal } = useSettings();
+  const { hasRole } = useAuth();
+  const isPengurus = hasRole("Admin", "Bendahara", "Super Admin", "Ketua RT");
+  const [agendaList, setAgendaList] = useState<Agenda[]>([]);
+  const [marqueeSpeed, setMarqueeSpeed] = useState(readMarqueeSpeed());
   const [time, setTime] = useState<Date | null>(null);
   const [spinning, setSpinning] = useState(false);
   const [online, setOnline] = useState(0);
@@ -73,12 +82,26 @@ function Dashboard() {
     return () => clearInterval(id);
   }, [kasSaldoAwal]);
 
+  useEffect(() => {
+    const load = () => { void fetchAgenda().then(setAgendaList).catch(() => setAgendaList([])); };
+    load();
+    const id = setInterval(load, 60000);
+    const onSpeed = () => setMarqueeSpeed(readMarqueeSpeed());
+    window.addEventListener("sirt06-marquee-speed", onSpeed);
+    return () => { clearInterval(id); window.removeEventListener("sirt06-marquee-speed", onSpeed); };
+  }, []);
+
+  const agendaAktif = agendaList.filter((a) => !a.arsip && a.status !== "Dibatalkan" && a.status !== "Selesai");
+  const agendaMendatang = agendaAktif.filter((a) => selisihHari(a.tanggal) >= 0);
+  const agendaBerikut = agendaMendatang[0] ?? null;
+  const agendaH1 = agendaMendatang.filter((a) => selisihHari(a.tanggal) === 1);
+
   const stats = [
     { label: "Total Warga", value: counts.warga, icon: Users, trend: counts.warga ? "Live" : "—", tone: "from-blue-500 to-indigo-500" },
     { label: "Total KK", value: counts.kk, icon: Home, trend: counts.kk ? "Live" : "—", tone: "from-cyan-500 to-blue-500" },
     { label: "Total Kas", value: rupiah(counts.kas), icon: Wallet, trend: "Live", tone: "from-emerald-500 to-teal-500" },
     { label: "Pengumuman Aktif", value: counts.pengumumanAktif, icon: Megaphone, trend: counts.pengumumanAktif ? "Aktif" : "—", tone: "from-amber-500 to-orange-500" },
-    { label: "Agenda", value: counts.agenda, icon: CalendarCheck, trend: counts.agenda ? "Tersedia" : "—", tone: "from-fuchsia-500 to-pink-500" },
+    { label: "Agenda", value: agendaMendatang.length, icon: CalendarCheck, trend: agendaMendatang.length ? "Tersedia" : "—", tone: "from-fuchsia-500 to-pink-500" },
     { label: "Pengunjung Online", value: online, icon: Eye, trend: "Live", tone: "from-violet-500 to-purple-500" },
   ];
 
@@ -125,8 +148,7 @@ function Dashboard() {
   const hari = time ? HARI[time.getDay()] : "—";
   const tanggal = time ? `${time.getDate()} ${BULAN[time.getMonth()]} ${time.getFullYear()}` : "—";
 
-  // Demo: agenda hari ini (kosong by default — diisi dari modul Administrasi nanti)
-  const agendaHariIni: { nama: string; jam: string; tempat: string }[] = [];
+  const agendaHariIni = agendaAktif.filter((a) => selisihHari(a.tanggal) === 0);
 
   const backupTerakhir = time
     ? `${time.getDate()} ${BULAN[time.getMonth()]} ${time.getFullYear()} • 03:00 WIB`
@@ -154,6 +176,39 @@ function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Running text agenda berikutnya */}
+      <div className="overflow-hidden rounded-2xl glass border border-primary/20">
+        <div className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3 py-2.5">
+          <div className="shrink-0 h-8 px-2.5 rounded-lg bg-gradient-to-br from-fuchsia-500 to-pink-500 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-soft">
+            <CalendarCheck className="h-3 w-3" /> AGENDA
+          </div>
+          <div className="overflow-hidden flex-1 [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
+            <div
+              className="flex gap-10 whitespace-nowrap animate-marquee text-[13px] sm:text-sm font-medium"
+              style={{ animationDuration: `${marqueeSpeed}s` }}
+            >
+              {(agendaBerikut
+                ? [agendaText(agendaBerikut), agendaText(agendaBerikut)]
+                : ["Belum ada agenda."]
+              ).map((t, i) => (
+                <span key={i} className="text-foreground/90">{t}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {isPengurus && agendaH1.length > 0 && (
+        <div className="glass rounded-2xl border border-amber-500/30 px-3 py-2.5">
+          <div className="text-[11px] font-bold text-amber-600 dark:text-amber-400">🔔 Pengingat H-1</div>
+          {agendaH1.map((a) => (
+            <div key={a.id} className="text-[12px] sm:text-sm mt-0.5">
+              <b>{a.judul}</b> — besok {hariDari(a.tanggal)}, {tanggalPanjang(a.tanggal)} pukul {a.jam} WIB di {a.tempat || "-"}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Hero Header */}
       <section className="relative overflow-hidden rounded-3xl glass-strong p-5 sm:p-7">
@@ -288,7 +343,7 @@ function Dashboard() {
                 <p className="text-[11px] text-muted-foreground">{hari}, {tanggal}</p>
               </div>
             </div>
-            <Link to="/administrasi" className="text-[11px] text-primary font-semibold flex items-center gap-1 hover:underline">
+            <Link to="/agenda" className="text-[11px] text-primary font-semibold flex items-center gap-1 hover:underline">
               Semua <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
@@ -297,19 +352,19 @@ function Dashboard() {
               <div className="h-12 w-12 rounded-2xl bg-muted grid place-items-center mb-2">
                 <CalendarX className="h-5 w-5 text-muted-foreground" />
               </div>
-              <div className="text-sm font-semibold">Tidak ada agenda hari ini</div>
+              <div className="text-sm font-semibold">Belum ada agenda.</div>
               <p className="text-[11px] text-muted-foreground mt-0.5">Jadwal kegiatan akan tampil di sini saat tersedia.</p>
             </div>
           ) : (
             <ul className="space-y-2">
-              {agendaHariIni.map((a, i) => (
-                <li key={i} className="flex items-center gap-3 p-2.5 rounded-xl glass">
+              {agendaHariIni.map((a) => (
+                <li key={a.id} className="flex items-center gap-3 p-2.5 rounded-xl glass">
                   <div className="h-10 w-10 rounded-xl gradient-primary text-primary-foreground grid place-items-center shrink-0">
                     <Clock className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold truncate">{a.nama}</div>
-                    <div className="text-[11px] text-muted-foreground truncate">{a.jam} • {a.tempat}</div>
+                    <div className="text-sm font-semibold truncate">{a.judul}</div>
+                    <div className="text-[11px] text-muted-foreground truncate">{a.jam} WIB • {a.tempat || "-"}</div>
                   </div>
                 </li>
               ))}
@@ -376,13 +431,29 @@ function Dashboard() {
         <div className="glass-strong rounded-2xl p-5">
           <h3 className="font-bold mb-1">Agenda Mendatang</h3>
           <p className="text-xs text-muted-foreground mb-4">Jadwal kegiatan RT</p>
+          {agendaMendatang.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center py-8 px-3 rounded-xl border border-dashed border-border/60">
             <div className="h-12 w-12 rounded-2xl bg-muted grid place-items-center mb-2">
               <CalendarX className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div className="text-sm font-semibold">Belum ada agenda</div>
-            <Link to="/absensi" className="text-[11px] text-primary font-semibold mt-1 hover:underline">Buat Agenda →</Link>
+            <div className="text-sm font-semibold">Belum ada agenda.</div>
+            <Link to="/agenda" className="text-[11px] text-primary font-semibold mt-1 hover:underline">Buka Agenda →</Link>
           </div>
+          ) : (
+            <ul className="space-y-2">
+              {agendaMendatang.slice(0, 4).map((a) => (
+                <li key={a.id} className="p-2.5 rounded-xl glass">
+                  <div className="text-sm font-semibold truncate">{a.judul}</div>
+                  <div className="text-[11px] text-muted-foreground truncate">
+                    {hariDari(a.tanggal)}, {tanggalPanjang(a.tanggal)} • {a.jam} WIB
+                  </div>
+                </li>
+              ))}
+              <li className="pt-1">
+                <Link to="/agenda" className="text-[11px] text-primary font-semibold hover:underline">Lihat semua agenda →</Link>
+              </li>
+            </ul>
+          )}
         </div>
       </section>
     </div>
