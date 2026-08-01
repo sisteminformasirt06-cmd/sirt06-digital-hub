@@ -431,13 +431,29 @@ function Dashboard() {
         <div className="glass-strong rounded-2xl p-5">
           <h3 className="font-bold mb-1">Agenda Mendatang</h3>
           <p className="text-xs text-muted-foreground mb-4">Jadwal kegiatan RT</p>
+          {agendaMendatang.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center py-8 px-3 rounded-xl border border-dashed border-border/60">
             <div className="h-12 w-12 rounded-2xl bg-muted grid place-items-center mb-2">
               <CalendarX className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div className="text-sm font-semibold">Belum ada agenda</div>
-            <Link to="/absensi" className="text-[11px] text-primary font-semibold mt-1 hover:underline">Buat Agenda →</Link>
+            <div className="text-sm font-semibold">Belum ada agenda.</div>
+            <Link to="/agenda" className="text-[11px] text-primary font-semibold mt-1 hover:underline">Buka Agenda →</Link>
           </div>
+          ) : (
+            <ul className="space-y-2">
+              {agendaMendatang.slice(0, 4).map((a) => (
+                <li key={a.id} className="p-2.5 rounded-xl glass">
+                  <div className="text-sm font-semibold truncate">{a.judul}</div>
+                  <div className="text-[11px] text-muted-foreground truncate">
+                    {hariDari(a.tanggal)}, {tanggalPanjang(a.tanggal)} • {a.jam} WIB
+                  </div>
+                </li>
+              ))}
+              <li className="pt-1">
+                <Link to="/agenda" className="text-[11px] text-primary font-semibold hover:underline">Lihat semua agenda →</Link>
+              </li>
+            </ul>
+          )}
         </div>
       </section>
     </div>
