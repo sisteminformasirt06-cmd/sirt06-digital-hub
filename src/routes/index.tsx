@@ -12,6 +12,11 @@ import { loadLS } from "@/lib/storage";
 import { PENGUMUMAN_KEY, isAktif, type Pengumuman } from "./media";
 import { useSettings } from "@/lib/settings-context";
 import { rupiah } from "@/lib/storage";
+import { useAuth } from "@/lib/auth-context";
+import {
+  fetchAgenda, agendaText, hariDari, tanggalPanjang, selisihHari,
+  readMarqueeSpeed, type Agenda,
+} from "@/lib/agenda-shared";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -46,6 +51,10 @@ const quickAccess = [
 
 function Dashboard() {
   const { identity, kasSaldoAwal } = useSettings();
+  const { hasRole } = useAuth();
+  const isPengurus = hasRole("Admin", "Bendahara", "Super Admin", "Ketua RT");
+  const [agendaList, setAgendaList] = useState<Agenda[]>([]);
+  const [marqueeSpeed, setMarqueeSpeed] = useState(readMarqueeSpeed());
   const [time, setTime] = useState<Date | null>(null);
   const [spinning, setSpinning] = useState(false);
   const [online, setOnline] = useState(0);
@@ -73,12 +82,26 @@ function Dashboard() {
     return () => clearInterval(id);
   }, [kasSaldoAwal]);
 
+  useEffect(() => {
+    const load = () => { void fetchAgenda().then(setAgendaList).catch(() => setAgendaList([])); };
+    load();
+    const id = setInterval(load, 60000);
+    const onSpeed = () => setMarqueeSpeed(readMarqueeSpeed());
+    window.addEventListener("sirt06-marquee-speed", onSpeed);
+    return () => { clearInterval(id); window.removeEventListener("sirt06-marquee-speed", onSpeed); };
+  }, []);
+
+  const agendaAktif = agendaList.filter((a) => !a.arsip && a.status !== "Dibatalkan" && a.status !== "Selesai");
+  const agendaMendatang = agendaAktif.filter((a) => selisihHari(a.tanggal) >= 0);
+  const agendaBerikut = agendaMendatang[0] ?? null;
+  const agendaH1 = agendaMendatang.filter((a) => selisihHari(a.tanggal) === 1);
+
   const stats = [
     { label: "Total Warga", value: counts.warga, icon: Users, trend: counts.warga ? "Live" : "—", tone: "from-blue-500 to-indigo-500" },
     { label: "Total KK", value: counts.kk, icon: Home, trend: counts.kk ? "Live" : "—", tone: "from-cyan-500 to-blue-500" },
     { label: "Total Kas", value: rupiah(counts.kas), icon: Wallet, trend: "Live", tone: "from-emerald-500 to-teal-500" },
     { label: "Pengumuman Aktif", value: counts.pengumumanAktif, icon: Megaphone, trend: counts.pengumumanAktif ? "Aktif" : "—", tone: "from-amber-500 to-orange-500" },
-    { label: "Agenda", value: counts.agenda, icon: CalendarCheck, trend: counts.agenda ? "Tersedia" : "—", tone: "from-fuchsia-500 to-pink-500" },
+    { label: "Agenda", value: agendaMendatang.length, icon: CalendarCheck, trend: agendaMendatang.length ? "Tersedia" : "—", tone: "from-fuchsia-500 to-pink-500" },
     { label: "Pengunjung Online", value: online, icon: Eye, trend: "Live", tone: "from-violet-500 to-purple-500" },
   ];
 
@@ -125,8 +148,7 @@ function Dashboard() {
   const hari = time ? HARI[time.getDay()] : "—";
   const tanggal = time ? `${time.getDate()} ${BULAN[time.getMonth()]} ${time.getFullYear()}` : "—";
 
-  // Demo: agenda hari ini (kosong by default — diisi dari modul Administrasi nanti)
-  const agendaHariIni: { nama: string; jam: string; tempat: string }[] = [];
+  const agendaHariIni = agendaAktif.filter((a) => selisihHari(a.tanggal) === 0);
 
   const backupTerakhir = time
     ? `${time.getDate()} ${BULAN[time.getMonth()]} ${time.getFullYear()} • 03:00 WIB`
