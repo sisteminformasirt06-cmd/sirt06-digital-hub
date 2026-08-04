@@ -171,6 +171,63 @@ export type Database = {
           },
         ]
       }
+      inventaris: {
+        Row: {
+          created_at: string
+          foto_url: string | null
+          id: string
+          jumlah: number
+          kategori: string
+          keterangan: string | null
+          kode: string
+          kondisi: string
+          lokasi: string | null
+          merk: string | null
+          nama: string
+          nilai: number
+          satuan: string
+          sumber_dana: string | null
+          tanggal_pembelian: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          foto_url?: string | null
+          id?: string
+          jumlah?: number
+          kategori?: string
+          keterangan?: string | null
+          kode: string
+          kondisi?: string
+          lokasi?: string | null
+          merk?: string | null
+          nama: string
+          nilai?: number
+          satuan?: string
+          sumber_dana?: string | null
+          tanggal_pembelian?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          foto_url?: string | null
+          id?: string
+          jumlah?: number
+          kategori?: string
+          keterangan?: string | null
+          kode?: string
+          kondisi?: string
+          lokasi?: string | null
+          merk?: string | null
+          nama?: string
+          nilai?: number
+          satuan?: string
+          sumber_dana?: string | null
+          tanggal_pembelian?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       kartu_keluarga: {
         Row: {
           alamat: string
@@ -212,6 +269,56 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      peminjaman_inventaris: {
+        Row: {
+          catatan: string | null
+          created_at: string
+          id: string
+          inventaris_id: string
+          jumlah: number
+          peminjam: string
+          petugas_nama: string | null
+          status: string
+          tanggal_kembali: string | null
+          tanggal_pinjam: string
+          updated_at: string
+        }
+        Insert: {
+          catatan?: string | null
+          created_at?: string
+          id?: string
+          inventaris_id: string
+          jumlah?: number
+          peminjam: string
+          petugas_nama?: string | null
+          status?: string
+          tanggal_kembali?: string | null
+          tanggal_pinjam?: string
+          updated_at?: string
+        }
+        Update: {
+          catatan?: string | null
+          created_at?: string
+          id?: string
+          inventaris_id?: string
+          jumlah?: number
+          peminjam?: string
+          petugas_nama?: string | null
+          status?: string
+          tanggal_kembali?: string | null
+          tanggal_pinjam?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "peminjaman_inventaris_inventaris_id_fkey"
+            columns: ["inventaris_id"]
+            isOneToOne: false
+            referencedRelation: "inventaris"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pengurus: {
         Row: {
@@ -497,6 +604,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      next_inventaris_kode: { Args: { _kategori: string }; Returns: string }
       next_surat_nomor: { Args: { _jenis_kode: string }; Returns: string }
       pengurus_attempt_login: { Args: { _pin: string }; Returns: Json }
       pengurus_change_pin: {
