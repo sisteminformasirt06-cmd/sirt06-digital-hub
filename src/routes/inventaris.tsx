@@ -376,7 +376,7 @@ function InventarisPage() {
             onSubmit={async (d) => {
               const { error } = await supabase.from("peminjaman_inventaris").insert({ ...d, petugas_nama: user.nama } as never);
               if (error) { alert(error.message); return; }
-              logAction("Peminjaman barang", "Inventaris", d.peminjam);
+              logAction("Peminjaman barang", "Inventaris", String(d.peminjam));
               setShowPinjam(false);
               await load();
             }}
