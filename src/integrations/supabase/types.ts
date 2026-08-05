@@ -402,6 +402,234 @@ export type Database = {
           },
         ]
       }
+      poskamling_absensi: {
+        Row: {
+          catatan: string | null
+          created_at: string
+          foto_url: string | null
+          id: string
+          jadwal_id: string | null
+          jam_masuk: string | null
+          jam_pulang: string | null
+          lokasi: string | null
+          petugas_nama: string
+          status: string
+          tanggal: string
+          updated_at: string
+        }
+        Insert: {
+          catatan?: string | null
+          created_at?: string
+          foto_url?: string | null
+          id?: string
+          jadwal_id?: string | null
+          jam_masuk?: string | null
+          jam_pulang?: string | null
+          lokasi?: string | null
+          petugas_nama: string
+          status?: string
+          tanggal?: string
+          updated_at?: string
+        }
+        Update: {
+          catatan?: string | null
+          created_at?: string
+          foto_url?: string | null
+          id?: string
+          jadwal_id?: string | null
+          jam_masuk?: string | null
+          jam_pulang?: string | null
+          lokasi?: string | null
+          petugas_nama?: string
+          status?: string
+          tanggal?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poskamling_absensi_jadwal_id_fkey"
+            columns: ["jadwal_id"]
+            isOneToOne: false
+            referencedRelation: "poskamling_jadwal"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poskamling_inventaris: {
+        Row: {
+          catatan: string | null
+          created_at: string
+          ditambah_oleh: string | null
+          id: string
+          inventaris_id: string
+          jumlah: number
+          updated_at: string
+        }
+        Insert: {
+          catatan?: string | null
+          created_at?: string
+          ditambah_oleh?: string | null
+          id?: string
+          inventaris_id: string
+          jumlah?: number
+          updated_at?: string
+        }
+        Update: {
+          catatan?: string | null
+          created_at?: string
+          ditambah_oleh?: string | null
+          id?: string
+          inventaris_id?: string
+          jumlah?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poskamling_inventaris_inventaris_id_fkey"
+            columns: ["inventaris_id"]
+            isOneToOne: true
+            referencedRelation: "inventaris"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poskamling_jadwal: {
+        Row: {
+          catatan: string | null
+          created_at: string
+          dibuat_oleh: string | null
+          hari: string
+          id: string
+          jam_mulai: string
+          jam_selesai: string
+          petugas_1: string
+          petugas_2: string | null
+          petugas_cadangan: string | null
+          regu: string
+          tanggal: string
+          updated_at: string
+        }
+        Insert: {
+          catatan?: string | null
+          created_at?: string
+          dibuat_oleh?: string | null
+          hari?: string
+          id?: string
+          jam_mulai?: string
+          jam_selesai?: string
+          petugas_1: string
+          petugas_2?: string | null
+          petugas_cadangan?: string | null
+          regu?: string
+          tanggal: string
+          updated_at?: string
+        }
+        Update: {
+          catatan?: string | null
+          created_at?: string
+          dibuat_oleh?: string | null
+          hari?: string
+          id?: string
+          jam_mulai?: string
+          jam_selesai?: string
+          petugas_1?: string
+          petugas_2?: string | null
+          petugas_cadangan?: string | null
+          regu?: string
+          tanggal?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      poskamling_laporan: {
+        Row: {
+          created_at: string
+          deskripsi: string
+          foto_url: string | null
+          id: string
+          judul: string
+          lokasi: string | null
+          pelapor_nama: string | null
+          status: string
+          tanggal: string
+          tindak_lanjut: string | null
+          tingkat: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deskripsi?: string
+          foto_url?: string | null
+          id?: string
+          judul: string
+          lokasi?: string | null
+          pelapor_nama?: string | null
+          status?: string
+          tanggal?: string
+          tindak_lanjut?: string | null
+          tingkat?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deskripsi?: string
+          foto_url?: string | null
+          id?: string
+          judul?: string
+          lokasi?: string | null
+          pelapor_nama?: string | null
+          status?: string
+          tanggal?: string
+          tindak_lanjut?: string | null
+          tingkat?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      poskamling_petugas: {
+        Row: {
+          aktif: boolean
+          anggota_id: string | null
+          created_at: string
+          id: string
+          keterangan: string | null
+          nama: string
+          no_hp: string | null
+          regu: string
+          updated_at: string
+        }
+        Insert: {
+          aktif?: boolean
+          anggota_id?: string | null
+          created_at?: string
+          id?: string
+          keterangan?: string | null
+          nama: string
+          no_hp?: string | null
+          regu?: string
+          updated_at?: string
+        }
+        Update: {
+          aktif?: boolean
+          anggota_id?: string | null
+          created_at?: string
+          id?: string
+          keterangan?: string | null
+          nama?: string
+          no_hp?: string | null
+          regu?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poskamling_petugas_anggota_id_fkey"
+            columns: ["anggota_id"]
+            isOneToOne: false
+            referencedRelation: "anggota_keluarga"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       surat_pengajuan: {
         Row: {
           alasan_tolak: string | null
