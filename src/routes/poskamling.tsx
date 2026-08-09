@@ -152,7 +152,7 @@ function PoskamlingPage() {
         supabase.from("poskamling_jadwal").select("*").order("tanggal", { ascending: false }),
         supabase.from("poskamling_absensi").select("*").order("tanggal", { ascending: false }),
         supabase.from("poskamling_laporan").select("*").order("created_at", { ascending: false }),
-        supabase.from("inventaris").select("id,kode,nama,kategori,jumlah,satuan,kondisi,lokasi").order("nama"),
+        supabase.from("inventaris").select("id,kode,nama,kategori,jumlah,satuan,kondisi,lokasi").eq("kategori", "Peralatan Poskamling").order("nama"),
         supabase.from("poskamling_inventaris").select("*").order("created_at", { ascending: false }),
         supabase.from("anggota_keluarga").select("nama").order("nama"),
       ]);
