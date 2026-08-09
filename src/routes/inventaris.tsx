@@ -51,6 +51,8 @@ interface Barang {
   nilai: number;
   foto_url: string | null;
   keterangan: string | null;
+  jumlah_tersedia: number;
+  status: string;
   created_at: string;
 }
 
