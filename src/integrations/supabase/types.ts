@@ -177,6 +177,7 @@ export type Database = {
           foto_url: string | null
           id: string
           jumlah: number
+          jumlah_tersedia: number
           kategori: string
           keterangan: string | null
           kode: string
@@ -186,6 +187,7 @@ export type Database = {
           nama: string
           nilai: number
           satuan: string
+          status: string
           sumber_dana: string | null
           tanggal_pembelian: string | null
           updated_at: string
@@ -195,6 +197,7 @@ export type Database = {
           foto_url?: string | null
           id?: string
           jumlah?: number
+          jumlah_tersedia?: number
           kategori?: string
           keterangan?: string | null
           kode: string
@@ -204,6 +207,7 @@ export type Database = {
           nama: string
           nilai?: number
           satuan?: string
+          status?: string
           sumber_dana?: string | null
           tanggal_pembelian?: string | null
           updated_at?: string
@@ -213,6 +217,7 @@ export type Database = {
           foto_url?: string | null
           id?: string
           jumlah?: number
+          jumlah_tersedia?: number
           kategori?: string
           keterangan?: string | null
           kode?: string
@@ -222,6 +227,7 @@ export type Database = {
           nama?: string
           nilai?: number
           satuan?: string
+          status?: string
           sumber_dana?: string | null
           tanggal_pembelian?: string | null
           updated_at?: string
@@ -842,6 +848,10 @@ export type Database = {
       pengurus_reset_pin: { Args: { _id: string }; Returns: undefined }
       pengurus_set_pin: {
         Args: { _id: string; _pin: string }
+        Returns: undefined
+      }
+      recalc_inventaris_stok: {
+        Args: { _inventaris_id: string }
         Returns: undefined
       }
     }
