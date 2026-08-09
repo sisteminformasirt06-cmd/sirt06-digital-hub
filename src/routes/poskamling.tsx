@@ -505,7 +505,7 @@ function PoskamlingPage() {
               </button>
             )}
           </div>
-          <p className="text-[11px] text-muted-foreground">Data barang diambil dari Modul Inventaris RT. Petugas hanya memilih barang yang ada di Poskamling.</p>
+          <p className="text-[11px] text-muted-foreground">Data barang diambil dari Modul Inventaris RT kategori &quot;Peralatan Poskamling&quot;. Tidak ada tabel inventaris terpisah untuk Poskamling.</p>
           {posInv.length === 0 ? <Empty /> : (
             <DataTable
               headers={["Kode", "Nama Barang", "Kategori", "Jumlah di Pos", "Kondisi", "Catatan", ""]}
