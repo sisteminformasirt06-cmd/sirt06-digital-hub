@@ -312,12 +312,13 @@ function InventarisPage() {
             </div>
           </div>
           <DataTable
-            headers={["Kode", "Nama", "Kategori", "Jumlah", "Kondisi", "Lokasi", "Nilai", ""]}
+            headers={["Kode", "Nama", "Kategori", "Jumlah", "Tersedia", "Kondisi", "Lokasi", "Nilai", ""]}
             rows={filtered.map((b) => [
               <span key="k" className="font-mono text-[11px]">{b.kode}</span>,
               b.nama,
               b.kategori,
               `${b.jumlah} ${b.satuan}`,
+              <span key="t" className={`font-semibold ${b.jumlah_tersedia <= 0 ? "text-destructive" : ""}`}>{b.jumlah_tersedia} {b.satuan}</span>,
               <KondisiBadge key="c" k={b.kondisi} />,
               b.lokasi ?? "-",
               rupiah(Number(b.nilai || 0)),
