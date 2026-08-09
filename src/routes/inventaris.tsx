@@ -54,6 +54,7 @@ interface Barang {
   created_at: string;
 }
 
+
 interface Pinjam {
   id: string;
   inventaris_id: string;
