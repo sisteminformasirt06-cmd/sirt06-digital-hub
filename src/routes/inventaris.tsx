@@ -431,6 +431,8 @@ function DetailBarang({ b }: { b: Barang }) {
       <Row l="Kategori" v={b.kategori} />
       <Row l="Merk" v={b.merk || "-"} />
       <Row l="Jumlah" v={`${b.jumlah} ${b.satuan}`} />
+      <Row l="Jumlah Tersedia" v={`${b.jumlah_tersedia} ${b.satuan}`} />
+      <Row l="Status" v={b.status} />
       <Row l="Kondisi" v={<KondisiBadge k={b.kondisi} />} />
       <Row l="Lokasi Penyimpanan" v={b.lokasi || "-"} />
       <Row l="Tanggal Pembelian" v={b.tanggal_pembelian ? tanggal(b.tanggal_pembelian) : "-"} />
@@ -505,6 +507,8 @@ function PinjamForm({ barang, defaultNama, onSubmit }: { barang: Barang[]; defau
   const [status, setStatus] = useState<"Dipinjam" | "Dikembalikan">("Dipinjam");
   const [catatan, setC] = useState("");
   const [busy, setBusy] = useState(false);
+  const dipilih = barang.find((b) => b.id === inventarisId);
+  const maks = status === "Dipinjam" ? Math.max(dipilih?.jumlah_tersedia ?? 0, 0) : (dipilih?.jumlah ?? 0);
 
   if (barang.length === 0) {
     return <div className="text-xs text-muted-foreground text-center py-6">Belum ada data barang. Tambahkan barang terlebih dahulu.</div>;
@@ -515,6 +519,10 @@ function PinjamForm({ barang, defaultNama, onSubmit }: { barang: Barang[]; defau
       onSubmit={async (e) => {
         e.preventDefault();
         if (!inventarisId || !peminjam.trim()) return;
+        if (status === "Dipinjam" && Number(jumlah) > maks) {
+          alert(`Jumlah melebihi stok tersedia (${maks}).`);
+          return;
+        }
         setBusy(true);
         await onSubmit({
           inventaris_id: inventarisId, peminjam: peminjam.trim(), jumlah: Number(jumlah) || 1,
@@ -526,12 +534,16 @@ function PinjamForm({ barang, defaultNama, onSubmit }: { barang: Barang[]; defau
     >
       <Field label="Barang">
         <select required value={inventarisId} onChange={(e) => setId(e.target.value)} className="form-inp">
-          {barang.map((b) => <option key={b.id} value={b.id}>{b.nama} ({b.jumlah} {b.satuan})</option>)}
+          {barang.map((b) => (
+            <option key={b.id} value={b.id} disabled={b.jumlah_tersedia <= 0}>
+              {b.nama} (tersedia {b.jumlah_tersedia} {b.satuan})
+            </option>
+          ))}
         </select>
       </Field>
       <Field label="Nama Peminjam"><input required value={peminjam} onChange={(e) => setP(e.target.value)} className="form-inp" /></Field>
       <div className="grid grid-cols-2 gap-2">
-        <Field label="Jumlah"><input required type="number" min={1} value={jumlah} onChange={(e) => setJ(e.target.value)} className="form-inp" /></Field>
+        <Field label={`Jumlah (maks ${maks})`}><input required type="number" min={1} max={maks} value={jumlah} onChange={(e) => setJ(e.target.value)} className="form-inp" /></Field>
         <Field label="Status"><select value={status} onChange={(e) => setStatus(e.target.value as "Dipinjam" | "Dikembalikan")} className="form-inp"><option>Dipinjam</option><option>Dikembalikan</option></select></Field>
         <Field label="Tanggal Pinjam"><input type="date" value={tglPinjam} onChange={(e) => setTP(e.target.value)} className="form-inp" /></Field>
         <Field label="Tanggal Kembali"><input type="date" value={tglKembali} onChange={(e) => setTK(e.target.value)} className="form-inp" /></Field>
