@@ -152,7 +152,7 @@ function PoskamlingPage() {
         supabase.from("poskamling_jadwal").select("*").order("tanggal", { ascending: false }),
         supabase.from("poskamling_absensi").select("*").order("tanggal", { ascending: false }),
         supabase.from("poskamling_laporan").select("*").order("created_at", { ascending: false }),
-        supabase.from("inventaris").select("id,kode,nama,kategori,jumlah,satuan,kondisi,lokasi").order("nama"),
+        supabase.from("inventaris").select("id,kode,nama,kategori,jumlah,satuan,kondisi,lokasi").eq("kategori", "Peralatan Poskamling").order("nama"),
         supabase.from("poskamling_inventaris").select("*").order("created_at", { ascending: false }),
         supabase.from("anggota_keluarga").select("nama").order("nama"),
       ]);
@@ -505,7 +505,7 @@ function PoskamlingPage() {
               </button>
             )}
           </div>
-          <p className="text-[11px] text-muted-foreground">Data barang diambil dari Modul Inventaris RT. Petugas hanya memilih barang yang ada di Poskamling.</p>
+          <p className="text-[11px] text-muted-foreground">Data barang diambil dari Modul Inventaris RT kategori &quot;Peralatan Poskamling&quot;. Tidak ada tabel inventaris terpisah untuk Poskamling.</p>
           {posInv.length === 0 ? <Empty /> : (
             <DataTable
               headers={["Kode", "Nama Barang", "Kategori", "Jumlah di Pos", "Kondisi", "Catatan", ""]}

@@ -8,7 +8,8 @@ import {
   CheckCircle2, Database, CalendarX, MapPin,
 } from "lucide-react";
 import logo from "@/assets/logo-rt.png";
-import { loadLS } from "@/lib/storage";
+import { loadLS, saveLS } from "@/lib/storage";
+import { supabase } from "@/integrations/supabase/client";
 import { PENGUMUMAN_KEY, isAktif, type Pengumuman } from "./media";
 import { useSettings } from "@/lib/settings-context";
 import { rupiah } from "@/lib/storage";
@@ -64,22 +65,33 @@ function Dashboard() {
   const [counts, setCounts] = useState({ warga: 0, kk: 0, kas: 0, pengumumanAktif: 0, agenda: 0 });
 
   useEffect(() => {
-    const refresh = () => {
-      const warga = loadLS<unknown[]>("sirt06_warga_v1", []);
-      const kk = loadLS<unknown[]>("sirt06_kk_v1", []);
-      const trx = loadLS<{ kas: string; tipe: string; jumlah: number }[]>("sirt06_trx_v1", []);
+    let alive = true;
+    const refresh = async () => {
+      const [wargaRes, kkRes, trxRes] = await Promise.all([
+        supabase.from("anggota_keluarga").select("id", { count: "exact", head: true }),
+        supabase.from("kartu_keluarga").select("id", { count: "exact", head: true }),
+        supabase.from("transaksi_kas").select("tipe,jumlah"),
+      ]);
       let totalKas = 0;
       Object.values(kasSaldoAwal).forEach((v) => (totalKas += Number(v) || 0));
-      trx.forEach((t) => { totalKas += t.tipe === "Masuk" ? t.jumlah : -t.jumlah; });
+      (trxRes.data ?? []).forEach((t) => {
+        const n = Number(t.jumlah) || 0;
+        totalKas += t.tipe === "Masuk" ? n : -n;
+      });
       const pgm = loadLS<Pengumuman[]>(PENGUMUMAN_KEY, []);
-      const now = new Date();
-      const aktif = pgm.filter((p) => isAktif(p, now)).length;
-      const agenda = loadLS<unknown[]>("sirt06_kegiatan_v1", []).length;
-      setCounts({ warga: warga.length, kk: kk.length, kas: totalKas, pengumumanAktif: aktif, agenda });
+      const aktif = pgm.filter((p) => isAktif(p, new Date())).length;
+      if (!alive) return;
+      setCounts({
+        warga: wargaRes.count ?? 0,
+        kk: kkRes.count ?? 0,
+        kas: totalKas,
+        pengumumanAktif: aktif,
+        agenda: 0,
+      });
     };
-    refresh();
-    const id = setInterval(refresh, 10000);
-    return () => clearInterval(id);
+    void refresh();
+    const id = setInterval(() => void refresh(), 30000);
+    return () => { alive = false; clearInterval(id); };
   }, [kasSaldoAwal]);
 
   useEffect(() => {
@@ -128,14 +140,25 @@ function Dashboard() {
     return () => clearInterval(id);
   }, []);
 
-  // Realtime visitor simulation (lightweight)
+  // Penghitung kunjungan nyata (per perangkat) — bukan angka simulasi
   useEffect(() => {
-    const id = setInterval(() => {
-      setOnline((v) => Math.max(8, Math.min(60, v + Math.round((Math.random() - 0.5) * 4))));
-      setToday((v) => v + (Math.random() < 0.35 ? 1 : 0));
-      setMonth((v) => v + (Math.random() < 0.15 ? 1 : 0));
-    }, 4000);
-    return () => clearInterval(id);
+    const KEY = "sirt06.visits.v1";
+    const now = new Date();
+    const hariKey = now.toISOString().slice(0, 10);
+    const bulanKey = now.toISOString().slice(0, 7);
+    const v = loadLS<{ hariKey: string; hari: number; bulanKey: string; bulan: number }>(KEY, {
+      hariKey, hari: 0, bulanKey, bulan: 0,
+    });
+    const next = {
+      hariKey,
+      hari: (v.hariKey === hariKey ? v.hari : 0) + 1,
+      bulanKey,
+      bulan: (v.bulanKey === bulanKey ? v.bulan : 0) + 1,
+    };
+    saveLS(KEY, next);
+    setOnline(1);
+    setToday(next.hari);
+    setMonth(next.bulan);
   }, []);
 
   const liveVisitorStats = [
@@ -150,9 +173,7 @@ function Dashboard() {
 
   const agendaHariIni = agendaAktif.filter((a) => selisihHari(a.tanggal) === 0);
 
-  const backupTerakhir = time
-    ? `${time.getDate()} ${BULAN[time.getMonth()]} ${time.getFullYear()} • 03:00 WIB`
-    : "—";
+  const backupTerakhir = "Belum ada backup.";
 
   const handleRefresh = () => {
     setSpinning(true);
