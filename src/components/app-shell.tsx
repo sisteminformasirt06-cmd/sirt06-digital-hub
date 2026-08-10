@@ -1,18 +1,20 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { Menu, Moon, Sun, RefreshCw, Bell, LogIn, LogOut, ShieldCheck } from "lucide-react";
+import { Menu, Moon, Sun, RefreshCw, Bell, LogIn, LogOut, ShieldCheck, Lock } from "lucide-react";
 import logo from "@/assets/logo-rt.png";
 import { useTheme } from "@/lib/theme-context";
 import { useAuth } from "@/lib/auth-context";
-import { navFor } from "./nav-config";
+import { navFor, accessFor, canAccess } from "./nav-config";
 import { cn } from "@/lib/utils";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [openMobile, setOpenMobile] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { theme, toggle } = useTheme();
-  const { user, logout } = useAuth();
+  const { user, logout, loadingSession } = useAuth();
   const role = user?.role;
+  const access = accessFor(pathname);
+  const allowed = canAccess(access, role);
 
   useEffect(() => setOpenMobile(false), [pathname]);
 
@@ -98,13 +100,47 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 min-w-0 px-3 sm:px-5 py-4 sm:py-6 pb-32">{children}</main>
+        <main className="flex-1 min-w-0 px-3 sm:px-5 py-4 sm:py-6 pb-32">
+          {allowed ? children : loadingSession ? (
+            <div className="glass rounded-2xl p-6 text-center text-sm text-muted-foreground">Memeriksa sesi…</div>
+          ) : (
+            <AccessDenied access={access} loggedIn={!!user} />
+          )}
+        </main>
       </div>
     </div>
   );
 }
 
 function SidebarInner({ pathname, role }: { pathname: string; role?: string }) {
+  return <SidebarBody pathname={pathname} role={role} />;
+}
+
+function AccessDenied({ access, loggedIn }: { access: string; loggedIn: boolean }) {
+  return (
+    <div className="max-w-md mx-auto glass-strong rounded-3xl p-6 text-center space-y-3">
+      <div className="h-12 w-12 mx-auto grid place-items-center rounded-2xl bg-destructive/10 text-destructive">
+        <Lock className="h-6 w-6" />
+      </div>
+      <div className="text-base font-bold">Akses Terbatas</div>
+      <p className="text-xs text-muted-foreground">
+        {loggedIn
+          ? access === "super"
+            ? "Halaman ini hanya untuk Super Admin."
+            : "Halaman ini hanya untuk pengurus RT."
+          : "Silakan login sebagai pengurus dengan PIN 6 digit untuk membuka halaman ini."}
+      </p>
+      <div className="flex items-center justify-center gap-2">
+        <Link to="/login" className="inline-flex items-center gap-1.5 rounded-2xl gradient-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold shadow-glow">
+          <LogIn className="h-4 w-4" /> Login Pengurus
+        </Link>
+        <Link to="/" className="inline-flex items-center rounded-2xl glass px-4 py-2.5 text-sm font-semibold">Kembali</Link>
+      </div>
+    </div>
+  );
+}
+
+function SidebarBody({ pathname, role }: { pathname: string; role?: string }) {
   const items = navFor(role as never);
   return (
     <>
