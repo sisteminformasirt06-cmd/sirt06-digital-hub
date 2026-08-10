@@ -45,8 +45,18 @@ export const loginWithPin = createServerFn({ method: "POST" })
       return { ok: false as const };
     }
     await createSession(r.id);
-    const u = await getCurrentPengurus();
-    await logAudit(u, "Login", "Auth");
+    await logAudit(
+      {
+        id: r.id as string,
+        nama: r.nama as string,
+        jabatan: r.jabatan,
+        role: r.jabatan,
+        harus_ganti_pin: !!r.harus_ganti_pin,
+        aktif: true,
+      },
+      "Login",
+      "Auth",
+    );
     return { ok: true as const, harusGantiPin: r.harus_ganti_pin as boolean };
   });
 
