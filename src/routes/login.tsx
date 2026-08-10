@@ -36,7 +36,7 @@ function LoginPage() {
         return;
       }
       setErr(null);
-      navigate({ to: "/" });
+      navigate({ to: r.harusGantiPin ? "/ganti-pin" : "/" });
     } finally {
       setBusy(false);
     }
@@ -104,11 +104,11 @@ function LoginPage() {
           </button>
         </form>
         <div className="mt-5 text-[11px] text-muted-foreground text-center flex items-center justify-center gap-1.5">
-          <Lock className="h-3 w-3" /> Login PIN lokal. Default: Warga <b>111111</b> · Admin <b>222222</b> · Bendahara <b>333333</b> · Super Admin <b>000000</b>
+          <Lock className="h-3 w-3" /> PIN tersimpan ter-enkripsi di database. Super Admin awal: <b>123456</b> (wajib diganti saat login pertama).
         </div>
       </div>
       <div className="glass rounded-2xl p-3 text-[11px] text-muted-foreground text-center">
-        Sesi login tersimpan lokal hingga Anda menekan Logout.
+        Sesi login aman (cookie server) dan tetap aktif setelah refresh hingga Anda menekan Logout.
       </div>
     </div>
   );

@@ -92,3 +92,29 @@ export function navFor(role?: Role | null): NavItem[] {
 
 // Backwards-compat: some code imports navItems directly.
 export const navItems: readonly NavItem[] = WARGA;
+// ---- Kontrol akses per rute (guard di AppShell) ----
+export type Access = "public" | "pengurus" | "super";
+
+const SUPER_ONLY = [
+  "/super-admin", "/manajemen-pin", "/role-permission", "/audit-log",
+  "/backup-restore", "/supabase-panel", "/google-drive",
+];
+
+const PENGURUS_ONLY = [
+  "/warga", "/administrasi", "/keuangan", "/kas-rt", "/kas-sosial",
+  "/kas-perkakas", "/kas-tossa", "/kas-hut-ri", "/laporan",
+  "/inventaris", "/poskamling", "/absensi", "/whatsapp",
+];
+
+export function accessFor(pathname: string): Access {
+  if (SUPER_ONLY.some((p) => pathname === p || pathname.startsWith(p + "/"))) return "super";
+  if (PENGURUS_ONLY.some((p) => pathname === p || pathname.startsWith(p + "/"))) return "pengurus";
+  return "public";
+}
+
+export function canAccess(access: Access, role?: Role | null): boolean {
+  if (access === "public") return true;
+  if (!role) return false;
+  if (access === "super") return role === "Super Admin";
+  return role !== "Warga";
+}
