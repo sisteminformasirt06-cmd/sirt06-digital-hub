@@ -11,7 +11,7 @@ export const loginWithPin = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ pin: z.string().regex(/^\d{6}$/) }).parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { createSession, logAudit, getCurrentPengurus } = await import("./auth-session.server");
+    const { createSession, logAudit } = await import("./auth-session.server");
     // Auto-init: buat akun Super Admin default (PIN 123456) jika belum ada
     const { count: saCount } = await supabaseAdmin
       .from("pengurus")
