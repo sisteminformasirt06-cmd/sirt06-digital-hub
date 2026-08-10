@@ -3,6 +3,11 @@ import {
   type ReactNode,
 } from "react";
 
+import { getCurrentSession, loginWithPin, logoutSession, recordAudit } from "./auth.functions";
+import { listPengurus, createPengurus, updatePengurus, deletePengurus } from "./pengurus.functions";
+import { listAudit } from "./pengurus.functions";
+import type { Jabatan } from "./role-map";
+
 // Simplified 4-role system. Legacy role labels kept in the union so existing
 // permission checks (e.g. "Ketua RT", "Sekretaris") still typecheck; only the
 // four canonical roles below are ever assigned at runtime.
@@ -19,10 +24,27 @@ export type Role =
 
 export const ROLES: Role[] = ["Warga", "Admin", "Bendahara", "Super Admin"];
 
+/** Map jabatan (database) -> salah satu dari 4 role aplikasi. */
+export function jabatanToRole(j: Jabatan | string): Role {
+  if (j === "super_admin") return "Super Admin";
+  if (j === "bendahara_1" || j === "bendahara_2") return "Bendahara";
+  if (j === "warga") return "Warga";
+  return "Admin";
+}
+
+/** Map role aplikasi -> jabatan default di database. */
+export function roleToJabatan(r: Role): Jabatan {
+  if (r === "Super Admin") return "super_admin";
+  if (r === "Bendahara") return "bendahara_1";
+  if (r === "Warga") return "warga";
+  return "sekretaris";
+}
+
 export interface StaffUser {
   id: string;
   nama: string;
   role: Role;
+  jabatan?: Jabatan;
   pin?: string;
   aktif: boolean;
   createdAt: string;
@@ -62,132 +84,156 @@ interface AuthCtx {
 
 const Ctx = createContext<AuthCtx | null>(null);
 
-const LS_PINS = "sirt06.pins.v1";
-const LS_SESSION = "sirt06.session.v1";
-const LS_USERS = "sirt06.users.v1";
-const LS_AUDIT = "sirt06.audit.v1";
-
+// PIN default hanya sebagai informasi; PIN sebenarnya tersimpan ter-hash di database.
 const DEFAULT_PINS: Record<Role, string> = {
-  "Warga": "111111",
-  "Admin": "222222",
-  "Bendahara": "333333",
-  "Super Admin": "000000",
+  "Warga": "-",
+  "Admin": "-",
+  "Bendahara": "-",
+  "Super Admin": "123456",
 } as Record<Role, string>;
 
-function readLS<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
-  try {
-    const raw = window.localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
-  } catch { return fallback; }
-}
-function writeLS(key: string, val: unknown) {
-  if (typeof window === "undefined") return;
-  try { window.localStorage.setItem(key, JSON.stringify(val)); } catch { /* ignore */ }
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [pins, setPins] = useState<Record<Role, string>>(DEFAULT_PINS);
   const [user, setUser] = useState<StaffUser | null>(null);
   const [users, setUsers] = useState<StaffUser[]>([]);
   const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [loadingSession, setLoadingSession] = useState(true);
 
-  useEffect(() => {
-    setPins({ ...DEFAULT_PINS, ...readLS<Record<Role, string>>(LS_PINS, {} as Record<Role, string>) });
-    setUser(readLS<StaffUser | null>(LS_SESSION, null));
-    setUsers(readLS<StaffUser[]>(LS_USERS, []));
-    setAudit(readLS<AuditEntry[]>(LS_AUDIT, []));
-    setLoadingSession(false);
+  const refresh = useCallback(async () => {
+    try {
+      const s = await getCurrentSession();
+      if (!s) {
+        setUser(null);
+        setUsers([]);
+        setAudit([]);
+        return;
+      }
+      setUser({
+        id: s.id,
+        nama: s.nama,
+        role: jabatanToRole(s.jabatan),
+        jabatan: s.jabatan,
+        aktif: s.aktif,
+        createdAt: new Date().toISOString(),
+        harusGantiPin: s.harus_ganti_pin,
+      });
+      const [rowsU, rowsA] = await Promise.all([
+        listPengurus().catch(() => []),
+        listAudit().catch(() => []),
+      ]);
+      setUsers(
+        (rowsU as any[]).map((p) => ({
+          id: p.id,
+          nama: p.nama,
+          role: jabatanToRole(p.jabatan),
+          jabatan: p.jabatan as Jabatan,
+          aktif: p.aktif,
+          createdAt: p.created_at,
+          harusGantiPin: p.harus_ganti_pin,
+          lastLoginAt: p.last_login_at,
+          lockedUntil: p.locked_until,
+          gagalLogin: p.gagal_login,
+        })),
+      );
+      setAudit(
+        (rowsA as any[]).map((a) => ({
+          id: a.id,
+          nama: a.nama,
+          role: a.role ? jabatanToRole(a.role) : null,
+          aksi: a.aksi,
+          modul: a.modul,
+          detail: a.detail,
+          waktu: a.waktu,
+        })),
+      );
+    } finally {
+      setLoadingSession(false);
+    }
   }, []);
 
-  const roleNameMap: Record<Role, string> = {
-    "Warga": "Warga",
-    "Admin": "Admin RT",
-    "Bendahara": "Bendahara RT",
-    "Super Admin": "Super Admin",
-  } as Record<Role, string>;
+  useEffect(() => { void refresh(); }, [refresh]);
 
   const login: AuthCtx["login"] = useCallback(async (pin) => {
-    const entry = (Object.entries(pins) as [Role, string][]).find(([, v]) => v === pin);
-    if (!entry) return { ok: false, message: "PIN salah atau tidak dikenali" };
-    const [role] = entry;
-    const su: StaffUser = {
-      id: role.toLowerCase().replace(/\s+/g, "-"),
-      nama: roleNameMap[role] ?? role,
-      role,
-      aktif: true,
-      createdAt: new Date().toISOString(),
-      lastLoginAt: new Date().toISOString(),
-    };
-    setUser(su);
-    writeLS(LS_SESSION, su);
-    return { ok: true };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pins]);
+    try {
+      const r = await loginWithPin({ data: { pin } });
+      if (!r.ok) {
+        if ("locked" in r && r.locked) {
+          return { ok: false, message: "Akun terkunci sementara. Coba lagi nanti." };
+        }
+        return { ok: false, message: "PIN salah atau tidak dikenali" };
+      }
+      await refresh();
+      return { ok: true, harusGantiPin: r.harusGantiPin };
+    } catch (e) {
+      return { ok: false, message: (e as Error).message || "Gagal login" };
+    }
+  }, [refresh]);
 
   const logout: AuthCtx["logout"] = useCallback(async () => {
-    setUser(null);
-    writeLS(LS_SESSION, null);
+    try { await logoutSession(); } finally {
+      setUser(null);
+      setUsers([]);
+      setAudit([]);
+    }
   }, []);
 
-  const setPin = useCallback((role: Role, pin: string) => {
-    setPins((prev) => {
-      const next = { ...prev, [role]: pin };
-      writeLS(LS_PINS, next);
-      return next;
-    });
+  const setPin = useCallback((_role: Role, _pin: string) => {
+    /* PIN dikelola per akun di database (Super Admin > Reset PIN, atau Ganti PIN). */
   }, []);
 
   const logAction = useCallback((aksi: string, modul: string, detail?: string) => {
-    setAudit((prev) => {
-      const entry: AuditEntry = {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    setAudit((prev) => [
+      {
+        id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         nama: user?.nama ?? "Anonim",
         role: user?.role ?? null,
         aksi, modul, detail: detail ?? null,
         waktu: new Date().toISOString(),
-      };
-      const next = [entry, ...prev].slice(0, 500);
-      writeLS(LS_AUDIT, next);
-      return next;
-    });
+      },
+      ...prev,
+    ].slice(0, 500));
+    void recordAudit({ data: { aksi, modul, detail } }).catch(() => {});
   }, [user]);
 
   const addUser: AuthCtx["addUser"] = useCallback(async (u) => {
-    setUsers((prev) => {
-      const next: StaffUser[] = [
-        ...prev,
-        { ...u, id: `${Date.now()}`, createdAt: new Date().toISOString() },
-      ];
-      writeLS(LS_USERS, next);
-      return next;
+    await createPengurus({
+      data: {
+        nama: u.nama,
+        jabatan: u.jabatan ?? roleToJabatan(u.role),
+        ...(u.pin && /^\d{6}$/.test(u.pin) ? { pin: u.pin } : {}),
+      },
     });
-  }, []);
+    await refresh();
+  }, [refresh]);
+
   const updateUser: AuthCtx["updateUser"] = useCallback(async (id, patch) => {
-    setUsers((prev) => {
-      const next = prev.map((u) => (u.id === id ? { ...u, ...patch } : u));
-      writeLS(LS_USERS, next);
-      return next;
+    await updatePengurus({
+      data: {
+        id,
+        ...(patch.nama !== undefined ? { nama: patch.nama } : {}),
+        ...(patch.jabatan !== undefined
+          ? { jabatan: patch.jabatan }
+          : patch.role !== undefined
+            ? { jabatan: roleToJabatan(patch.role) }
+            : {}),
+        ...(patch.aktif !== undefined ? { aktif: patch.aktif } : {}),
+      },
     });
-  }, []);
+    await refresh();
+  }, [refresh]);
+
   const removeUser: AuthCtx["removeUser"] = useCallback(async (id) => {
-    setUsers((prev) => {
-      const next = prev.filter((u) => u.id !== id);
-      writeLS(LS_USERS, next);
-      return next;
-    });
-  }, []);
+    await deletePengurus({ data: { id } });
+    await refresh();
+  }, [refresh]);
 
   const hasRole: AuthCtx["hasRole"] = (...roles) => !!user && roles.includes(user.role);
-  const refresh = useCallback(async () => {}, []);
 
   const value = useMemo<AuthCtx>(() => ({
     user, sessionUser: user, loadingSession,
-    users, audit, pins,
+    users, audit, pins: DEFAULT_PINS,
     login, logout, setPin, addUser, updateUser, removeUser, logAction, hasRole, refresh,
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [user, loadingSession, users, audit, pins, login, logout, setPin, addUser, updateUser, removeUser, logAction, refresh]);
+  }), [user, loadingSession, users, audit, login, logout, setPin, addUser, updateUser, removeUser, logAction, refresh]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
