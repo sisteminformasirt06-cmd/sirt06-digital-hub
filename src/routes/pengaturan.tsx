@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import {
   Settings, Building2, Users as UsersIcon, Phone, Wallet, Music2, Siren,
@@ -482,15 +482,28 @@ function triggerDownload(blob: Blob, filename: string) {
 
 /* ---------- Keamanan ---------- */
 function KeamananSection({ isSuper }: { isSuper: boolean }) {
-  const { users, addUser, updateUser, removeUser } = useAuth();
+  const { users, addUser, updateUser, removeUser, user } = useAuth();
   const [nama, setNama] = useState("");
   const [role, setRole] = useState<Role>("Sekretaris");
   const [pin, setPin] = useState("");
 
+  const gantiPinLink = user ? (
+    <Link
+      to="/ganti-pin"
+      className="glass rounded-xl p-3 text-xs font-semibold flex items-center justify-between hover:bg-accent"
+    >
+      <span>Ganti PIN saya (6 digit)</span>
+      <span className="text-primary">Buka →</span>
+    </Link>
+  ) : null;
+
   if (!isSuper) {
     return (
       <Card title="Keamanan" desc="Akses Role Based">
-        <div className="text-xs text-muted-foreground">Hanya Super Admin yang dapat mengelola akun pengurus.</div>
+        <div className="space-y-3">
+          {gantiPinLink}
+          <div className="text-xs text-muted-foreground">Hanya Super Admin yang dapat mengelola akun pengurus.</div>
+        </div>
       </Card>
     );
   }
@@ -504,6 +517,7 @@ function KeamananSection({ isSuper }: { isSuper: boolean }) {
   return (
     <Card title="Keamanan & Akses" desc="Role Based Access — PIN 6 digit untuk pengurus, Warga tanpa login">
       <div className="space-y-3">
+        {gantiPinLink}
         <div className="glass rounded-xl p-3 text-[11px] text-muted-foreground">
           Portal warga tetap dapat diakses tanpa login. PIN 6 digit hanya untuk pengurus.
         </div>

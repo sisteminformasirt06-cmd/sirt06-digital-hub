@@ -1,7 +1,8 @@
 import { createHash, randomBytes } from "node:crypto";
-import { getCookie, setCookie } from "@tanstack/react-start/server";
+import { getCookie, setCookie, getRequestHeaders } from "@tanstack/react-start/server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { jabatanToLabel, type Jabatan } from "./role-map";
+import { SESSION_HEADER } from "./session-token";
 
 export const SESSION_COOKIE = "sirt_pengurus_session";
 export const SESSION_DAYS = 7;
@@ -23,8 +24,19 @@ export interface SessionUser {
   aktif: boolean;
 }
 
+/**
+ * Token sesi diambil dari header (fallback untuk preview di dalam iframe /
+ * browser yang memblokir cookie pihak ketiga) atau dari cookie httpOnly.
+ */
+function readSessionToken(): string | null {
+  let header: string | undefined;
+  try { header = getRequestHeaders().get(SESSION_HEADER) ?? undefined; } catch { header = undefined; }
+  if (header) return header;
+  try { return getCookie(SESSION_COOKIE) ?? null; } catch { return null; }
+}
+
 export async function getCurrentPengurus(): Promise<SessionUser | null> {
-  const token = getCookie(SESSION_COOKIE);
+  const token = readSessionToken();
   if (!token) return null;
   const hash = sha256(token);
   const { data: sess } = await supabaseAdmin
@@ -74,21 +86,27 @@ export async function createSession(pengurusId: string) {
     token_hash: hash,
     expires_at: expires.toISOString(),
   });
-  setCookie(SESSION_COOKIE, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: SESSION_DAYS * 86400,
-    secure: true,
-  });
+  try {
+    setCookie(SESSION_COOKIE, token, {
+      httpOnly: true,
+      // "none" agar sesi tetap terkirim ketika aplikasi dibuka di dalam iframe
+      sameSite: "none",
+      path: "/",
+      maxAge: SESSION_DAYS * 86400,
+      secure: true,
+    });
+  } catch { /* cookie opsional; token header tetap dipakai */ }
+  return token;
 }
 
 export async function destroyCurrentSession() {
-  const token = getCookie(SESSION_COOKIE);
+  const token = readSessionToken();
   if (token) {
     await supabaseAdmin.from("pengurus_session").delete().eq("token_hash", sha256(token));
   }
-  setCookie(SESSION_COOKIE, "", { path: "/", maxAge: 0 });
+  try {
+    setCookie(SESSION_COOKIE, "", { path: "/", maxAge: 0, sameSite: "none", secure: true });
+  } catch { /* ignore */ }
 }
 
 export async function logAudit(

@@ -44,7 +44,7 @@ export const loginWithPin = createServerFn({ method: "POST" })
       await logAudit(null, "Login gagal", "Auth", "PIN tidak valid");
       return { ok: false as const };
     }
-    await createSession(r.id);
+    const token = await createSession(r.id);
     await logAudit(
       {
         id: r.id as string,
@@ -57,7 +57,12 @@ export const loginWithPin = createServerFn({ method: "POST" })
       "Login",
       "Auth",
     );
-    return { ok: true as const, harusGantiPin: r.harus_ganti_pin as boolean };
+    return {
+      ok: true as const,
+      token,
+      harusGantiPin: r.harus_ganti_pin as boolean,
+      role: r.jabatan as string,
+    };
   });
 
 export const logoutSession = createServerFn({ method: "POST" }).handler(async () => {
