@@ -6,6 +6,7 @@ import {
 import { getCurrentSession, loginWithPin, logoutSession, recordAudit } from "./auth.functions";
 import { listPengurus, createPengurus, updatePengurus, deletePengurus } from "./pengurus.functions";
 import { listAudit } from "./pengurus.functions";
+import { clearSessionToken, setSessionToken } from "./session-token";
 import type { Jabatan } from "./role-map";
 
 // Simplified 4-role system. Legacy role labels kept in the union so existing
@@ -107,6 +108,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAudit([]);
         return;
       }
+    } catch {
+      // koneksi bermasalah: pertahankan state sebelumnya, jangan crash
+      return;
+    } finally {
+      setLoadingSession(false);
+    }
+    try {
+      const s = await getCurrentSession();
+      if (!s) return;
       setUser({
         id: s.id,
         nama: s.nama,
@@ -145,9 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           waktu: a.waktu,
         })),
       );
-    } finally {
-      setLoadingSession(false);
-    }
+    } catch { /* abaikan kegagalan pemuatan data tambahan */ }
   }, []);
 
   useEffect(() => { void refresh(); }, [refresh]);
@@ -157,19 +165,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const r = await loginWithPin({ data: { pin } });
       if (!r.ok) {
         if ("locked" in r && r.locked) {
-          return { ok: false, message: "Akun terkunci sementara. Coba lagi nanti." };
+          return { ok: false, message: "Akun terkunci sementara karena terlalu banyak percobaan. Coba lagi nanti." };
         }
-        return { ok: false, message: "PIN salah atau tidak dikenali" };
+        return { ok: false, message: "PIN tidak benar." };
       }
+      if ("token" in r && r.token) setSessionToken(r.token);
       await refresh();
       return { ok: true, harusGantiPin: r.harusGantiPin };
     } catch (e) {
-      return { ok: false, message: (e as Error).message || "Gagal login" };
+      console.error("login error", e);
+      return { ok: false, message: "Koneksi ke server sedang bermasalah. Coba lagi." };
     }
   }, [refresh]);
 
   const logout: AuthCtx["logout"] = useCallback(async () => {
-    try { await logoutSession(); } finally {
+    try { await logoutSession(); } catch { /* tetap bersihkan sesi lokal */ } finally {
+      clearSessionToken();
       setUser(null);
       setUsers([]);
       setAudit([]);
