@@ -100,23 +100,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loadingSession, setLoadingSession] = useState(true);
 
   const refresh = useCallback(async () => {
+    let s: Awaited<ReturnType<typeof getCurrentSession>> = null;
     try {
-      const s = await getCurrentSession();
-      if (!s) {
-        setUser(null);
-        setUsers([]);
-        setAudit([]);
-        return;
-      }
+      s = await getCurrentSession();
     } catch {
-      // koneksi bermasalah: pertahankan state sebelumnya, jangan crash
-      return;
-    } finally {
+      // Koneksi bermasalah: jangan crash, pertahankan state sebelumnya.
       setLoadingSession(false);
+      return;
+    }
+    setLoadingSession(false);
+    if (!s) {
+      setUser(null);
+      setUsers([]);
+      setAudit([]);
+      return;
     }
     try {
-      const s = await getCurrentSession();
-      if (!s) return;
       setUser({
         id: s.id,
         nama: s.nama,
