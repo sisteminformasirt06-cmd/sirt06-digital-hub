@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { getCookie, setCookie, getHeader } from "@tanstack/react-start/server";
+import { getCookie, setCookie, getRequestHeaders } from "@tanstack/react-start/server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { jabatanToLabel, type Jabatan } from "./role-map";
 import { SESSION_HEADER } from "./session-token";
@@ -30,7 +30,7 @@ export interface SessionUser {
  */
 function readSessionToken(): string | null {
   let header: string | undefined;
-  try { header = getHeader(SESSION_HEADER); } catch { header = undefined; }
+  try { header = getRequestHeaders().get(SESSION_HEADER) ?? undefined; } catch { header = undefined; }
   if (header) return header;
   try { return getCookie(SESSION_COOKIE) ?? null; } catch { return null; }
 }
